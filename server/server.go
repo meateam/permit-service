@@ -25,6 +25,7 @@ import (
 )
 
 const (
+	envPrefix                          = "PMTS"
 	configPort                         = "port"
 	configHealthCheckInterval          = "health_check_interval"
 	configElasticAPMIgnoreURLS         = "elastic_apm_ignore_urls"
@@ -49,6 +50,7 @@ func init() {
 	viper.SetDefault(configElasticAPMIgnoreURLS, "/grpc.health.v1.Health/Check")
 	viper.SetDefault(configMongoClientConnectionTimeout, 10)
 	viper.SetDefault(configMongoClientPingTimeout, 10)
+	viper.SetEnvPrefix(envPrefix)
 	viper.AutomaticEnv()
 }
 

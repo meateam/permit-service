@@ -1,7 +1,59 @@
 syntax = "proto3";
 
 package permit;
-
+ 
+enum Status {
+    NONE = 0;
+    REQUESTING = 1;
+    APPROVING = 2;
+    APPROVED = 3;
+}
 service permit {
+    rpc CreatePermit(CreatePermitRequest) returns (CreatePermitResponse) {}
+    rpc UpdatePermitStatus(UpdatePermitStatusRequest) returns (UpdatePermitStatusResponse) {}
+    rpc GetPermitByFileID(GetPermitByFileIDRequest) returns (GetPermitByFileIDResponse) {}
+}
+
+
+message CreatePermitRequest {
+    string fileID = 1;
+    string sharerID = 2;
+    repeated User users = 3;
+    string classification = 4;
+    string info = 5;
+}
+
+message User {
+    string id = 1;
+    string fullName = 2;
+    string heirarchy = 3;
+}
+
+message CreatePermitResponse {
 
 }
+
+
+message UpdatePermitStatusRequest {
+    string reqID = 1;
+    Status status = 2;
+}
+
+message UpdatePermitStatusResponse {
+
+}
+
+
+message GetPermitByFileIDRequest {
+    string fileID = 1;
+}
+
+message GetPermitByFileIDResponse {
+    repeated UserStatus userStatus = 1;
+}
+
+message UserStatus {
+    string userId = 1;
+    string status = 2;
+}
+
