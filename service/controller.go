@@ -8,8 +8,8 @@ import (
 
 // Controller is an interface for the business logic of the permit.Service which uses a Store.
 type Controller interface {
-	CreatePermit(ctx context.Context, reqID string, fileID string, userID string, status pb.Status) (Permit, error)
-	GetPermitByFileID(ctx context.Context, fileID string) ([]pb.UserStatus, error)
-	UpdatePermitStatus(ctx context.Context, req *pb.UpdatePermitStatusRequest) (*pb.UpdatePermitStatusResponse, error)
+	CreatePermit(ctx context.Context, reqID string, fileID string, userID string, status pb.Status) (bool, error)
+	GetPermitByFileID(ctx context.Context, fileID string) ([]*pb.UserStatus, error)
+	UpdatePermitStatus(ctx context.Context, reqID string, status pb.Status) (bool, error)
 	HealthCheck(ctx context.Context) (bool, error)
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 
 	pb "github.com/meateam/permit-service/proto"
-	"github.com/meateam/permit-service/service"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -30,16 +29,16 @@ func (c Controller) HealthCheck(ctx context.Context) (bool, error) {
 }
 
 // CreatePermit creates a permit in store and returns its unique ID.
-func (c Controller) CreatePermit(ctx context.Context, reqID string, fileID string, userID string, status pb.Status) (service.Permit, error) {
-	return nil, nil
+func (c Controller) CreatePermit(ctx context.Context, reqID string, fileID string, userID string, status pb.Status) (bool, error) {
+	return true, nil
 }
 
 // GetPermitByFileID returns the statuses of the permits of each user associated with the fileID.
-func (c Controller) GetPermitByFileID(ctx context.Context, fileID string) ([]pb.UserStatus, error) {
+func (c Controller) GetPermitByFileID(ctx context.Context, fileID string) ([]*pb.UserStatus, error) {
 	return nil, nil
 }
 
 // UpdatePermitStatus todo
-func (c Controller) UpdatePermitStatus(ctx context.Context, req *pb.UpdatePermitStatusRequest) (*pb.UpdatePermitStatusResponse, error) {
-	return nil, nil
+func (c Controller) UpdatePermitStatus(ctx context.Context, reqID string, status pb.Status) (bool, error) {
+	return true, nil
 }

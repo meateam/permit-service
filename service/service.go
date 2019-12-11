@@ -123,10 +123,36 @@ func (s Service) CreatePermit(ctx context.Context, req *pb.CreatePermitRequest) 
 
 // GetPermitByFileID is the request handler for getting a permit (user, status) by file id.
 func (s Service) GetPermitByFileID(ctx context.Context, req *pb.GetPermitByFileIDRequest) (*pb.GetPermitByFileIDResponse, error) {
-	return nil, nil
+	fileID := req.GetFileID()
+	if fileID == "" {
+		return nil, fmt.Errorf("fileID is required")
+	}
+
+	userStatuses, err := s.controller.GetPermitByFileID(ctx, fileID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve permit %v", err)
+	}
+
+	return &pb.GetPermitByFileIDResponse{UserStatus: userStatuses}, nil
 }
 
 // UpdatePermitStatus is the request handler for updating the status of a given permit.
 func (s Service) UpdatePermitStatus(ctx context.Context, req *pb.UpdatePermitStatusRequest) (*pb.UpdatePermitStatusResponse, error) {
-	return nil, nil
+	reqID := req.GetReqID()
+	status := req.GetStatus()
+
+	if reqID == "" {
+		return nil, fmt.Errorf("reqID is required")
+	}
+
+	ok, err := s.controller.UpdatePermitStatus(ctx, reqID, status)
+	if err != nil {
+		return nil, fmt.Errorf("update permit status failed %v", err)
+	}
+
+	if !ok {
+		_ = fmt.Errorf("error updating permit status")
+	}
+
+	return &pb.UpdatePermitStatusResponse{}, nil
 }
