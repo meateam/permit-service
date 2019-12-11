@@ -111,6 +111,7 @@ func (s Service) CreatePermit(ctx context.Context, req *pb.CreatePermitRequest) 
 		return nil, fmt.Errorf("failed creating json object, %v", err)
 	}
 
+	// TODO: input the correct envars
 	resp, err := http.Post("https://todo.com/bliblu", "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
 		return nil, fmt.Errorf("error while requesting from approval service %v", err)

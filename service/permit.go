@@ -6,5 +6,20 @@ import (
 
 // Permit is an interface of a permit object.
 type Permit interface {
-	MarshalProto(permission *pb.PermitObject) error
+	GetID() string
+	SetID(id string) error
+
+	GetReqID() string
+	SetReqID(reqID string) error
+
+	GetFileID() string
+	SetFileID(fileID string) error
+
+	GetUserID() string
+	SetUserID(userID string) error
+
+	GetStatus() pb.Status
+	SetStatus(status pb.Status) error
+
+	MarshalProto(permit *pb.PermitObject) error
 }

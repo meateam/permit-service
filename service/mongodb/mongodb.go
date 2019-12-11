@@ -3,22 +3,17 @@ package mongodb
 import (
 	"fmt"
 
+	pb "github.com/meateam/permit-service/proto"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// INFO is the struct that represents the information of the permit.
-type INFO struct {
-	Classification int    `bson:"classification,omitempty"`
-	Description    string `bson:"description,omitempty"`
-}
-
 // BSON is the struct that represents a permit as it's stored.
 type BSON struct {
-	ID       primitive.ObjectID `bson:"_id,omitempty"`
-	FileID   string             `bson:"fileID, omitempty"`
-	SharerID string             `bson:"sharerID,omitempty"`
-	UserID   string             `bson:"userID,omitempty"`
-	Info     *INFO              `bson:"info,omitempty"`
+	ID     primitive.ObjectID `bson:"_id,omitempty"`
+	FileID string             `bson:"fileID, omitempty"`
+	Status pb.Status          `bson:"status,omitempty"`
+	UserID string             `bson:"userID,omitempty"`
+	ReqID  string             `bson:"reqID,omitempty"`
 }
 
 // GetID returns the string value of the b.ID.
@@ -64,22 +59,18 @@ func (b *BSON) SetFileID(fileID string) error {
 	return nil
 }
 
-// GetSharerID returns b.SharerID.
-func (b BSON) GetSharerID() string {
-	return b.SharerID
+// GetStatus returns b.Status.
+func (b BSON) GetStatus() pb.Status {
+	return b.Status
 }
 
-// SetSharerID sets b.SharerID to sharerID.
-func (b *BSON) SetSharerID(sharerID string) error {
+// SetStatus sets b.SharerID to status.
+func (b *BSON) SetStatus(status pb.Status) error {
 	if b == nil {
 		panic("b == nil")
 	}
 
-	if sharerID == "" {
-		return fmt.Errorf("SharerID is required")
-	}
-
-	b.SharerID = sharerID
+	b.Status = status
 	return nil
 }
 
@@ -102,21 +93,31 @@ func (b *BSON) SetUserID(userID string) error {
 	return nil
 }
 
-// GetInfo returns b.UserID.
-func (b BSON) GetInfo() *INFO {
-	return b.Info
+// GetReqID returns b.reqID.
+func (b BSON) GetReqID() string {
+	return b.ReqID
 }
 
-// SetInfo sets b.UserID to userID.
-func (b *BSON) SetInfo(info *INFO) error {
+// SetReqID sets b.ReqID to reqID.
+func (b *BSON) SetReqID(reqID string) error {
 	if b == nil {
 		panic("b == nil")
 	}
 
-	if info == nil {
-		return fmt.Errorf("info is required")
+	if reqID == "" {
+		return fmt.Errorf("reqID is required")
 	}
 
-	b.Info = info
+	b.ReqID = reqID
+	return nil
+}
+
+// MarshalProto marshals b into a permission.
+func (b BSON) MarshalProto(permit *pb.PermitObject) error {
+	permit.ReqID = b.GetReqID()
+	permit.FileID = b.GetFileID()
+	permit.UserID = b.GetUserID()
+	permit.Status = b.GetStatus()
+
 	return nil
 }
