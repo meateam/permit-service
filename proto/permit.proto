@@ -57,3 +57,9 @@ message UserStatus {
     string status = 2;
 }
 
+message PermitObject {
+    string reqID = 1;
+    string fileID = 2;
+    string userID = 3;
+    Status status = 4;
+}
