@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	pb "github.com/meateam/permit-service/proto"
 	"github.com/meateam/permit-service/service"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -72,6 +73,53 @@ func (s MongoStore) HealthCheck(ctx context.Context) (bool, error) {
 	return true, nil
 }
 
+// Get finds one permit that matches filter,
+// if successful returns the permit, and a nil error,
+// if the permit is not found it would return nil and unimplemented error,
+// otherwise returns nil and non-nil error if any occured.
+func (s MongoStore) Get(ctx context.Context, filter interface{}) (service.Permit, error) {
+	collection := s.DB.Collection(PermitCollectionName)
+
+	permission := &BSON{}
+	err := collection.FindOne(ctx, filter).Decode(permission)
+	if err != nil {
+		return nil, err
+	}
+
+	return permission, nil
+}
+
+// GetAll finds all permits that matches filter,
+// if successful returns the permits, and a nil error,
+// otherwise returns nil and non-nil error if any occured.
+func (s MongoStore) GetAll(ctx context.Context, filter interface{}) ([]service.Permit, error) {
+	collection := s.DB.Collection(PermitCollectionName)
+
+	// cur is the cursor for itarating over the permits.
+	cur, err := collection.Find(ctx, filter)
+	defer cur.Close(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	permits := []service.Permit{}
+	for cur.Next(ctx) {
+		permit := &BSON{}
+		err := cur.Decode(permit)
+		if err != nil {
+			return nil, err
+		}
+
+		permits = append(permits, permit)
+	}
+
+	if err := cur.Err(); err != nil {
+		return nil, err
+	}
+
+	return permits, nil
+}
+
 // Create creates a permit of a file to a user,
 // If permit already exists then its updated to have the permit values,
 // If successful returns the permit and a nil error,
@@ -94,9 +142,6 @@ func (s MongoStore) Create(ctx context.Context, permit service.Permit) (service.
 	}
 
 	status := permit.GetStatus()
-	if reqID == "" {
-		return nil, fmt.Errorf("reqID is required")
-	}
 
 	filter := bson.D{
 		bson.E{
@@ -144,4 +189,13 @@ func (s MongoStore) Create(ctx context.Context, permit service.Permit) (service.
 	}
 
 	return newPermit, nil
+}
+
+// UpdatePermitsStatus updates all permits with a given reqID to a given status
+func (s MongoStore) UpdatePermitsStatus(ctx context.Context, reqID string, status pb.Status) (service.Permit, error) {
+	if reqID == "" {
+		return nil, fmt.Errorf("reqID is required")
+	}
+
+	return nil, nil
 }

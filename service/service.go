@@ -129,7 +129,7 @@ func (s Service) GetPermitByFileID(ctx context.Context, req *pb.GetPermitByFileI
 		return nil, fmt.Errorf("fileID is required")
 	}
 
-	userStatuses, err := s.controller.GetPermitByFileID(ctx, fileID)
+	userStatuses, err := s.controller.GetPermitsByFileID(ctx, fileID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve permit %v", err)
 	}
