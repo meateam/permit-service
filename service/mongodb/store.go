@@ -41,7 +41,8 @@ type MongoStore struct {
 func newMongoStore(db *mongo.Database) (MongoStore, error) {
 	collection := db.Collection(PermitCollectionName)
 	indexes := collection.Indexes()
-	// TODO: check ion indices
+
+	// The index of the collection is the combination of fileID and userID
 	indexModel := mongo.IndexModel{
 		Keys: bson.D{
 			bson.E{
@@ -191,11 +192,39 @@ func (s MongoStore) Create(ctx context.Context, permit service.Permit) (service.
 	return newPermit, nil
 }
 
-// UpdatePermitsStatus updates all permits with a given reqID to a given status
-func (s MongoStore) UpdatePermitsStatus(ctx context.Context, reqID string, status pb.Status) (service.Permit, error) {
+// UpdateStatus updates all permits with a given reqID to a given status
+func (s MongoStore) UpdateStatus(ctx context.Context, reqID string, status pb.Status) error {
+	collection := s.DB.Collection(PermitCollectionName)
 	if reqID == "" {
-		return nil, fmt.Errorf("reqID is required")
+		return fmt.Errorf("reqID is required")
 	}
 
-	return nil, nil
+	filter := bson.D{
+		bson.E{
+			Key:   PermitBSONReqIDField,
+			Value: reqID,
+		},
+	}
+
+	permitUpdate := bson.D{
+		bson.E{
+			Key:   PermitBSONStatusField,
+			Value: status,
+		},
+	}
+
+	update := bson.D{
+		bson.E{
+			Key:   "$set",
+			Value: permitUpdate,
+		},
+	}
+
+	opts := options.Update()
+	_, err := collection.UpdateMany(ctx, filter, update, opts)
+	if err != nil {
+		return fmt.Errorf("error while updating status %v", err)
+	}
+
+	return nil
 }

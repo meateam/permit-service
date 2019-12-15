@@ -36,7 +36,6 @@ func (c Controller) HealthCheck(ctx context.Context) (bool, error) {
 
 // CreatePermit creates a permit in store and returns its unique ID.
 func (c Controller) CreatePermit(ctx context.Context, reqID string, fileID string, userID string, status pb.Status) (service.Permit, error) {
-	fmt.Println("Todo: complete CreatePermit")
 	permit := &BSON{FileID: fileID, ReqID: reqID, UserID: userID, Status: status}
 	createdPermission, err := c.store.Create(ctx, permit)
 	if err != nil {
@@ -47,7 +46,6 @@ func (c Controller) CreatePermit(ctx context.Context, reqID string, fileID strin
 
 // GetPermitsByFileID returns the statuses of the permits of each user associated with the fileID.
 func (c Controller) GetPermitsByFileID(ctx context.Context, fileID string) ([]*pb.UserStatus, error) {
-	fmt.Println("Todo: complete GetPermitsByFileID")
 	filter := bson.D{
 		bson.E{
 			Key:   PermitBSONFileIDField,
@@ -76,7 +74,9 @@ func (c Controller) GetPermitsByFileID(ctx context.Context, fileID string) ([]*p
 
 // UpdatePermitStatus todo
 func (c Controller) UpdatePermitStatus(ctx context.Context, reqID string, status pb.Status) (bool, error) {
-	fmt.Println("Todo: complete UpdatePermitStatus")
-
+	err := c.store.UpdateStatus(ctx, reqID, status)
+	if err != nil {
+		return false, fmt.Errorf("updating status %v", err)
+	}
 	return true, nil
 }
