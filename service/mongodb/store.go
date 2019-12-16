@@ -9,7 +9,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
 const (
@@ -67,9 +66,9 @@ func newMongoStore(db *mongo.Database) (MongoStore, error) {
 
 // HealthCheck checks the health of the service, returns true if healthy, or false otherwise.
 func (s MongoStore) HealthCheck(ctx context.Context) (bool, error) {
-	if err := s.DB.Client().Ping(ctx, readpref.Primary()); err != nil {
-		return false, err
-	}
+	// if err := s.DB.Client().Ping(ctx, readpref.Primary()); err != nil {
+	// 	return false, err
+	// }
 
 	return true, nil
 }

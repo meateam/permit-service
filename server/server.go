@@ -14,6 +14,7 @@ import (
 	"github.com/meateam/permit-service/service/mongodb"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"go.elastic.co/apm/module/apmgrpc"
 	"go.elastic.co/apm/module/apmmongo"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -29,9 +30,10 @@ const (
 	configPort                         = "port"
 	configHealthCheckInterval          = "health_check_interval"
 	configElasticAPMIgnoreURLS         = "elastic_apm_ignore_urls"
-	configMongoConnectionString        = "mongodb://localhost:27017/permit"
+	configMongoConnectionString        = "config_mongo_connection_string"
 	configMongoClientConnectionTimeout = "mongo_client_connection_timeout"
 	configMongoClientPingTimeout       = "mongo_client_ping_timeout"
+	configSpikeService                 = "spike_service"
 )
 
 // PermitServer is a structure that holds the permit grpc server
@@ -48,7 +50,9 @@ func init() {
 	viper.SetDefault(configPort, "8080")
 	viper.SetDefault(configHealthCheckInterval, 3)
 	viper.SetDefault(configElasticAPMIgnoreURLS, "/grpc.health.v1.Health/Check")
+	viper.SetDefault(configMongoConnectionString, "mongodb://localhost:27017/permit")
 	viper.SetDefault(configMongoClientConnectionTimeout, 10)
+	viper.SetDefault(configSpikeService, "spike-service:8080")
 	viper.SetDefault(configMongoClientPingTimeout, 10)
 	viper.SetEnvPrefix(envPrefix)
 	viper.AutomaticEnv()
@@ -106,8 +110,14 @@ func NewServer(logger *logrus.Logger) *PermitServer {
 		logger.Fatalf("%v", err)
 	}
 
+	// Initiate services gRPC connections.
+	spikeConn, err := initServiceConn(viper.GetString(configSpikeService))
+	if err != nil {
+		logger.Fatalf("couldn't setup spike service connection: %v", err)
+	}
+
 	// Create a permit service and register it on the grpc server.
-	permitService := service.NewService(controller, logger)
+	permitService := service.NewService(controller, logger, spikeConn)
 	pb.RegisterPermitServer(grpcServer, permitService)
 
 	// Create a health server and register it on the grpc server.
@@ -178,7 +188,7 @@ func connectToMongoDB(connectionString string) (*mongo.Client, error) {
 
 	// Check the connection
 	mongoClientPingTimeout := viper.GetDuration(configMongoClientPingTimeout)
-	pingTimeoutCtx, cancelPing := context.WithTimeout(context.TODO(), mongoClientPingTimeout)
+	pingTimeoutCtx, cancelPing := context.WithTimeout(context.TODO(), mongoClientPingTimeout*time.Second)
 	defer cancelPing()
 	err = mongoClient.Ping(pingTimeoutCtx, readpref.Primary())
 	if err != nil {
@@ -229,4 +239,19 @@ func (s PermitServer) healthCheckWorker(healthServer *health.Server) {
 
 		time.Sleep(time.Second * time.Duration(s.healthCheckInterval))
 	}
+}
+
+// initServiceConn creates a gRPC connection to url, returns the created connection
+// and nil err on success. Returns non-nil error if any error occurred while
+// creating the connection.
+func initServiceConn(url string) (*grpc.ClientConn, error) {
+	conn, err := grpc.Dial(url,
+		grpc.WithUnaryInterceptor(apmgrpc.NewUnaryClientInterceptor()),
+		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(10<<20)),
+		grpc.WithInsecure())
+	if err != nil {
+		return nil, err
+	}
+
+	return conn, nil
 }

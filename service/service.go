@@ -10,14 +10,17 @@ import (
 	"time"
 
 	pb "github.com/meateam/permit-service/proto"
+	spb "github.com/meateam/spike-service/proto/spike-service"
 	"github.com/segmentio/ksuid"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
 )
 
 // Service is the structure used for handling
 type Service struct {
-	controller Controller
-	logger     *logrus.Logger
+	spikeClient spb.SpikeClient
+	controller  Controller
+	logger      *logrus.Logger
 }
 
 // ApprovalReqType is the struct sent as json to the approval service
@@ -32,7 +35,7 @@ type ApprovalReqType struct {
 
 // HealthCheck checks the health of the service, and returns a boolean accordingly.
 func (s *Service) HealthCheck(mongoClientPingTimeout time.Duration) bool {
-	timeoutCtx, cancel := context.WithTimeout(context.TODO(), mongoClientPingTimeout)
+	timeoutCtx, cancel := context.WithTimeout(context.TODO(), mongoClientPingTimeout*time.Second)
 	defer cancel()
 	healthy, err := s.controller.HealthCheck(timeoutCtx)
 	if err != nil {
@@ -44,8 +47,10 @@ func (s *Service) HealthCheck(mongoClientPingTimeout time.Duration) bool {
 }
 
 // NewService creates a Service and returns it.
-func NewService(controller Controller, logger *logrus.Logger) Service {
-	return Service{controller: controller, logger: logger}
+func NewService(controller Controller, logger *logrus.Logger, spikeConn *grpc.ClientConn) Service {
+	s := Service{controller: controller, logger: logger}
+	s.spikeClient = spb.NewSpikeClient(spikeConn)
+	return s
 }
 
 // CreatePermit is the request handler for creating a permit of a file to user.
@@ -95,6 +100,18 @@ func (s Service) CreatePermit(ctx context.Context, req *pb.CreatePermitRequest) 
 	}
 
 	// TODO: get spike token. add header of authorization bearer
+	getSpikeTokenRequest := &spb.GetSpikeTokenRequest{
+		GrantType: "grant_type",
+		Audience:  "audience",
+		Client:    nil,
+	}
+
+	token, err := s.spikeClient.GetSpikeToken(ctx, getSpikeTokenRequest)
+	if err != nil {
+		return nil, fmt.Errorf("failed getting spike token %v", err)
+	}
+	// TODO: what to do?
+	fmt.Println(token)
 
 	// Call Approval service with the required parameters.
 	requestBody, err := json.Marshal(
