@@ -30,8 +30,7 @@ func NewMongoController(db *mongo.Database) (Controller, error) {
 // HealthCheck runs store's healthcheck and returns true if healthy, otherwise returns false
 // and any error if occured.
 func (c Controller) HealthCheck(ctx context.Context) (bool, error) {
-	fmt.Println("Todo: complete healthcheck")
-	return true, nil
+	return c.store.HealthCheck(ctx)
 }
 
 // CreatePermit creates a permit in store and returns its unique ID.

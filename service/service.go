@@ -32,7 +32,7 @@ type ApprovalReqType struct {
 
 // HealthCheck checks the health of the service, and returns a boolean accordingly.
 func (s *Service) HealthCheck(mongoClientPingTimeout time.Duration) bool {
-	timeoutCtx, cancel := context.WithTimeout(context.TODO(), mongoClientPingTimeout*time.Second)
+	timeoutCtx, cancel := context.WithTimeout(context.TODO(), mongoClientPingTimeout)
 	defer cancel()
 	healthy, err := s.controller.HealthCheck(timeoutCtx)
 	if err != nil {
