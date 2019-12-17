@@ -205,22 +205,28 @@ func (s MongoStore) UpdateStatus(ctx context.Context, reqID string, status pb.St
 		},
 	}
 
-	permitUpdate := bson.D{
-		bson.E{
-			Key:   PermitBSONStatusField,
-			Value: status,
+	fmt.Println(status)
+	update := bson.M{
+		"$set": bson.M{
+			PermitBSONStatusField: status,
 		},
 	}
 
-	update := bson.D{
-		bson.E{
-			Key:   "$set",
-			Value: permitUpdate,
-		},
-	}
+	// Call the driver's UpdateMany() method and pass filter and update to it
+	result, err := collection.UpdateMany(
+		context.Background(),
+		filter,
+		update,
+	)
+	fmt.Println(result)
 
-	opts := options.Update()
-	_, err := collection.UpdateMany(ctx, filter, update, opts)
+	// opts := options.Update()
+	optsF := options.Find()
+	many, err := collection.Find(ctx, filter, optsF)
+	many.Decode(&BSON{})
+	fmt.Println(many)
+
+	// _, err = collection.UpdateMany(ctx, filter, update, opts)
 	if err != nil {
 		return fmt.Errorf("error while updating status %v", err)
 	}

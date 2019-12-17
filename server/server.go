@@ -52,7 +52,7 @@ func init() {
 	viper.SetDefault(configElasticAPMIgnoreURLS, "/grpc.health.v1.Health/Check")
 	viper.SetDefault(configMongoConnectionString, "mongodb://localhost:27017/permit")
 	viper.SetDefault(configMongoClientConnectionTimeout, 10)
-	viper.SetDefault(configSpikeService, "spike-service:8080")
+	viper.SetDefault(configSpikeService, "0.0.0.0:8080")
 	viper.SetDefault(configMongoClientPingTimeout, 10)
 	viper.SetEnvPrefix(envPrefix)
 	viper.AutomaticEnv()

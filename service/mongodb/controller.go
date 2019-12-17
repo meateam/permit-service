@@ -78,5 +78,6 @@ func (c Controller) UpdatePermitStatus(ctx context.Context, reqID string, status
 	if err != nil {
 		return false, fmt.Errorf("updating status %v", err)
 	}
+
 	return true, nil
 }

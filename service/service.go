@@ -1,11 +1,8 @@
 package service
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
-	"net/http"
 	"sync"
 	"time"
 
@@ -58,8 +55,8 @@ func (s Service) CreatePermit(ctx context.Context, req *pb.CreatePermitRequest) 
 	fileID := req.GetFileID()
 	sharerID := req.GetSharerID()
 	users := req.GetUsers()
-	classification := req.GetClassification()
-	info := req.GetInfo()
+	// classification := req.GetClassification()
+	// info := req.GetInfo()
 
 	usersNum := len(users)
 
@@ -101,9 +98,8 @@ func (s Service) CreatePermit(ctx context.Context, req *pb.CreatePermitRequest) 
 
 	// TODO: get spike token. add header of authorization bearer
 	getSpikeTokenRequest := &spb.GetSpikeTokenRequest{
-		GrantType: "grant_type",
-		Audience:  "audience",
-		Client:    nil,
+		GrantType: "grant_credentials",
+		Audience:  "kartoffel",
 	}
 
 	token, err := s.spikeClient.GetSpikeToken(ctx, getSpikeTokenRequest)
@@ -114,27 +110,27 @@ func (s Service) CreatePermit(ctx context.Context, req *pb.CreatePermitRequest) 
 	fmt.Println(token)
 
 	// Call Approval service with the required parameters.
-	requestBody, err := json.Marshal(
-		&ApprovalReqType{
-			reqID:          reqID.String(),
-			fileID:         fileID,
-			sharerID:       sharerID,
-			users:          userIDs,
-			classification: classification,
-			info:           info,
-		})
+	// requestBody, err := json.Marshal(
+	// 	&ApprovalReqType{
+	// 		reqID:          reqID.String(),
+	// 		fileID:         fileID,
+	// 		sharerID:       sharerID,
+	// 		users:          userIDs,
+	// 		classification: classification,
+	// 		info:           info,
+	// 	})
 
-	if err != nil {
-		return nil, fmt.Errorf("failed creating json object, %v", err)
-	}
+	// if err != nil {
+	// 	return nil, fmt.Errorf("failed creating json object, %v", err)
+	// }
 
-	// TODO: input the correct envars
-	resp, err := http.Post("https://todo.com/bliblu", "application/json", bytes.NewBuffer(requestBody))
-	if err != nil {
-		return nil, fmt.Errorf("error while requesting from approval service %v", err)
-	}
+	// // TODO: input the correct envars
+	// resp, err := http.Post("https://todo.com/bliblu", "application/json", bytes.NewBuffer(requestBody))
+	// if err != nil {
+	// 	return nil, fmt.Errorf("error while requesting from approval service %v", err)
+	// }
 
-	defer resp.Body.Close()
+	// defer resp.Body.Close()
 
 	return &pb.CreatePermitResponse{}, nil
 }
