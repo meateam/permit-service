@@ -26,11 +26,11 @@ import (
 )
 
 const (
-	envPrefix                          = "PMTS"
+	envPrefix                          = "pmts"
 	configPort                         = "port"
 	configHealthCheckInterval          = "health_check_interval"
 	configElasticAPMIgnoreURLS         = "elastic_apm_ignore_urls"
-	configMongoConnectionString        = "config_mongo_connection_string"
+	configMongoConnectionString        = "mongo_host"
 	configMongoClientConnectionTimeout = "mongo_client_connection_timeout"
 	configMongoClientPingTimeout       = "mongo_client_ping_timeout"
 	configSpikeService                 = "spike_service"

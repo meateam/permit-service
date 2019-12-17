@@ -205,7 +205,6 @@ func (s MongoStore) UpdateStatus(ctx context.Context, reqID string, status pb.St
 		},
 	}
 
-	fmt.Println(status)
 	update := bson.M{
 		"$set": bson.M{
 			PermitBSONStatusField: status,
@@ -224,7 +223,6 @@ func (s MongoStore) UpdateStatus(ctx context.Context, reqID string, status pb.St
 	optsF := options.Find()
 	many, err := collection.Find(ctx, filter, optsF)
 	many.Decode(&BSON{})
-	fmt.Println(many)
 
 	// _, err = collection.UpdateMany(ctx, filter, update, opts)
 	if err != nil {
