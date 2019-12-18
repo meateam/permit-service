@@ -18,6 +18,8 @@ type Service struct {
 	spikeClient spb.SpikeClient
 	controller  Controller
 	logger      *logrus.Logger
+	grantType   string
+	audience    string
 }
 
 // ApprovalReqType is the struct sent as json to the approval service
@@ -44,8 +46,8 @@ func (s *Service) HealthCheck(mongoClientPingTimeout time.Duration) bool {
 }
 
 // NewService creates a Service and returns it.
-func NewService(controller Controller, logger *logrus.Logger, spikeConn *grpc.ClientConn) Service {
-	s := Service{controller: controller, logger: logger}
+func NewService(controller Controller, logger *logrus.Logger, spikeConn *grpc.ClientConn, grantType string, audience string) Service {
+	s := Service{controller: controller, logger: logger, grantType: grantType, audience: audience}
 	s.spikeClient = spb.NewSpikeClient(spikeConn)
 	return s
 }
@@ -98,8 +100,8 @@ func (s Service) CreatePermit(ctx context.Context, req *pb.CreatePermitRequest) 
 
 	// TODO: get spike token. add header of authorization bearer
 	getSpikeTokenRequest := &spb.GetSpikeTokenRequest{
-		GrantType: "grant_credentials",
-		Audience:  "kartoffel",
+		GrantType: s.grantType,
+		Audience:  s.audience,
 	}
 
 	token, err := s.spikeClient.GetSpikeToken(ctx, getSpikeTokenRequest)
