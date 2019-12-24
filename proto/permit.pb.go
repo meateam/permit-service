@@ -8,6 +8,8 @@ import (
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
 	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 	math "math"
 )
 
@@ -22,14 +24,507 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
+type Status int32
+
+const (
+	Status_NONE       Status = 0
+	Status_REQUESTING Status = 1
+	Status_APPROVING  Status = 2
+	Status_APPROVED   Status = 3
+)
+
+var Status_name = map[int32]string{
+	0: "NONE",
+	1: "REQUESTING",
+	2: "APPROVING",
+	3: "APPROVED",
+}
+
+var Status_value = map[string]int32{
+	"NONE":       0,
+	"REQUESTING": 1,
+	"APPROVING":  2,
+	"APPROVED":   3,
+}
+
+func (x Status) String() string {
+	return proto.EnumName(Status_name, int32(x))
+}
+
+func (Status) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_727fd833651e2ed7, []int{0}
+}
+
+type CreatePermitRequest struct {
+	FileID               string   `protobuf:"bytes,1,opt,name=fileID,proto3" json:"fileID,omitempty"`
+	SharerID             string   `protobuf:"bytes,2,opt,name=sharerID,proto3" json:"sharerID,omitempty"`
+	Users                []*User  `protobuf:"bytes,3,rep,name=users,proto3" json:"users,omitempty"`
+	Classification       string   `protobuf:"bytes,4,opt,name=classification,proto3" json:"classification,omitempty"`
+	Info                 string   `protobuf:"bytes,5,opt,name=info,proto3" json:"info,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *CreatePermitRequest) Reset()         { *m = CreatePermitRequest{} }
+func (m *CreatePermitRequest) String() string { return proto.CompactTextString(m) }
+func (*CreatePermitRequest) ProtoMessage()    {}
+func (*CreatePermitRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_727fd833651e2ed7, []int{0}
+}
+
+func (m *CreatePermitRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CreatePermitRequest.Unmarshal(m, b)
+}
+func (m *CreatePermitRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CreatePermitRequest.Marshal(b, m, deterministic)
+}
+func (m *CreatePermitRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreatePermitRequest.Merge(m, src)
+}
+func (m *CreatePermitRequest) XXX_Size() int {
+	return xxx_messageInfo_CreatePermitRequest.Size(m)
+}
+func (m *CreatePermitRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_CreatePermitRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CreatePermitRequest proto.InternalMessageInfo
+
+func (m *CreatePermitRequest) GetFileID() string {
+	if m != nil {
+		return m.FileID
+	}
+	return ""
+}
+
+func (m *CreatePermitRequest) GetSharerID() string {
+	if m != nil {
+		return m.SharerID
+	}
+	return ""
+}
+
+func (m *CreatePermitRequest) GetUsers() []*User {
+	if m != nil {
+		return m.Users
+	}
+	return nil
+}
+
+func (m *CreatePermitRequest) GetClassification() string {
+	if m != nil {
+		return m.Classification
+	}
+	return ""
+}
+
+func (m *CreatePermitRequest) GetInfo() string {
+	if m != nil {
+		return m.Info
+	}
+	return ""
+}
+
+type User struct {
+	Id                   string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	FullName             string   `protobuf:"bytes,2,opt,name=fullName,proto3" json:"fullName,omitempty"`
+	Heirarchy            string   `protobuf:"bytes,3,opt,name=heirarchy,proto3" json:"heirarchy,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *User) Reset()         { *m = User{} }
+func (m *User) String() string { return proto.CompactTextString(m) }
+func (*User) ProtoMessage()    {}
+func (*User) Descriptor() ([]byte, []int) {
+	return fileDescriptor_727fd833651e2ed7, []int{1}
+}
+
+func (m *User) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_User.Unmarshal(m, b)
+}
+func (m *User) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_User.Marshal(b, m, deterministic)
+}
+func (m *User) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_User.Merge(m, src)
+}
+func (m *User) XXX_Size() int {
+	return xxx_messageInfo_User.Size(m)
+}
+func (m *User) XXX_DiscardUnknown() {
+	xxx_messageInfo_User.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_User proto.InternalMessageInfo
+
+func (m *User) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *User) GetFullName() string {
+	if m != nil {
+		return m.FullName
+	}
+	return ""
+}
+
+func (m *User) GetHeirarchy() string {
+	if m != nil {
+		return m.Heirarchy
+	}
+	return ""
+}
+
+type CreatePermitResponse struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *CreatePermitResponse) Reset()         { *m = CreatePermitResponse{} }
+func (m *CreatePermitResponse) String() string { return proto.CompactTextString(m) }
+func (*CreatePermitResponse) ProtoMessage()    {}
+func (*CreatePermitResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_727fd833651e2ed7, []int{2}
+}
+
+func (m *CreatePermitResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CreatePermitResponse.Unmarshal(m, b)
+}
+func (m *CreatePermitResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CreatePermitResponse.Marshal(b, m, deterministic)
+}
+func (m *CreatePermitResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreatePermitResponse.Merge(m, src)
+}
+func (m *CreatePermitResponse) XXX_Size() int {
+	return xxx_messageInfo_CreatePermitResponse.Size(m)
+}
+func (m *CreatePermitResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_CreatePermitResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CreatePermitResponse proto.InternalMessageInfo
+
+type UpdatePermitStatusRequest struct {
+	ReqID                string   `protobuf:"bytes,1,opt,name=reqID,proto3" json:"reqID,omitempty"`
+	Status               Status   `protobuf:"varint,2,opt,name=status,proto3,enum=permit.Status" json:"status,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *UpdatePermitStatusRequest) Reset()         { *m = UpdatePermitStatusRequest{} }
+func (m *UpdatePermitStatusRequest) String() string { return proto.CompactTextString(m) }
+func (*UpdatePermitStatusRequest) ProtoMessage()    {}
+func (*UpdatePermitStatusRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_727fd833651e2ed7, []int{3}
+}
+
+func (m *UpdatePermitStatusRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UpdatePermitStatusRequest.Unmarshal(m, b)
+}
+func (m *UpdatePermitStatusRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UpdatePermitStatusRequest.Marshal(b, m, deterministic)
+}
+func (m *UpdatePermitStatusRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdatePermitStatusRequest.Merge(m, src)
+}
+func (m *UpdatePermitStatusRequest) XXX_Size() int {
+	return xxx_messageInfo_UpdatePermitStatusRequest.Size(m)
+}
+func (m *UpdatePermitStatusRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdatePermitStatusRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdatePermitStatusRequest proto.InternalMessageInfo
+
+func (m *UpdatePermitStatusRequest) GetReqID() string {
+	if m != nil {
+		return m.ReqID
+	}
+	return ""
+}
+
+func (m *UpdatePermitStatusRequest) GetStatus() Status {
+	if m != nil {
+		return m.Status
+	}
+	return Status_NONE
+}
+
+type UpdatePermitStatusResponse struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *UpdatePermitStatusResponse) Reset()         { *m = UpdatePermitStatusResponse{} }
+func (m *UpdatePermitStatusResponse) String() string { return proto.CompactTextString(m) }
+func (*UpdatePermitStatusResponse) ProtoMessage()    {}
+func (*UpdatePermitStatusResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_727fd833651e2ed7, []int{4}
+}
+
+func (m *UpdatePermitStatusResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UpdatePermitStatusResponse.Unmarshal(m, b)
+}
+func (m *UpdatePermitStatusResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UpdatePermitStatusResponse.Marshal(b, m, deterministic)
+}
+func (m *UpdatePermitStatusResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdatePermitStatusResponse.Merge(m, src)
+}
+func (m *UpdatePermitStatusResponse) XXX_Size() int {
+	return xxx_messageInfo_UpdatePermitStatusResponse.Size(m)
+}
+func (m *UpdatePermitStatusResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdatePermitStatusResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdatePermitStatusResponse proto.InternalMessageInfo
+
+type GetPermitByFileIDRequest struct {
+	FileID               string   `protobuf:"bytes,1,opt,name=fileID,proto3" json:"fileID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetPermitByFileIDRequest) Reset()         { *m = GetPermitByFileIDRequest{} }
+func (m *GetPermitByFileIDRequest) String() string { return proto.CompactTextString(m) }
+func (*GetPermitByFileIDRequest) ProtoMessage()    {}
+func (*GetPermitByFileIDRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_727fd833651e2ed7, []int{5}
+}
+
+func (m *GetPermitByFileIDRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetPermitByFileIDRequest.Unmarshal(m, b)
+}
+func (m *GetPermitByFileIDRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetPermitByFileIDRequest.Marshal(b, m, deterministic)
+}
+func (m *GetPermitByFileIDRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetPermitByFileIDRequest.Merge(m, src)
+}
+func (m *GetPermitByFileIDRequest) XXX_Size() int {
+	return xxx_messageInfo_GetPermitByFileIDRequest.Size(m)
+}
+func (m *GetPermitByFileIDRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetPermitByFileIDRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetPermitByFileIDRequest proto.InternalMessageInfo
+
+func (m *GetPermitByFileIDRequest) GetFileID() string {
+	if m != nil {
+		return m.FileID
+	}
+	return ""
+}
+
+type GetPermitByFileIDResponse struct {
+	UserStatus           []*UserStatus `protobuf:"bytes,1,rep,name=userStatus,proto3" json:"userStatus,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
+	XXX_unrecognized     []byte        `json:"-"`
+	XXX_sizecache        int32         `json:"-"`
+}
+
+func (m *GetPermitByFileIDResponse) Reset()         { *m = GetPermitByFileIDResponse{} }
+func (m *GetPermitByFileIDResponse) String() string { return proto.CompactTextString(m) }
+func (*GetPermitByFileIDResponse) ProtoMessage()    {}
+func (*GetPermitByFileIDResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_727fd833651e2ed7, []int{6}
+}
+
+func (m *GetPermitByFileIDResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetPermitByFileIDResponse.Unmarshal(m, b)
+}
+func (m *GetPermitByFileIDResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetPermitByFileIDResponse.Marshal(b, m, deterministic)
+}
+func (m *GetPermitByFileIDResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetPermitByFileIDResponse.Merge(m, src)
+}
+func (m *GetPermitByFileIDResponse) XXX_Size() int {
+	return xxx_messageInfo_GetPermitByFileIDResponse.Size(m)
+}
+func (m *GetPermitByFileIDResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetPermitByFileIDResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetPermitByFileIDResponse proto.InternalMessageInfo
+
+func (m *GetPermitByFileIDResponse) GetUserStatus() []*UserStatus {
+	if m != nil {
+		return m.UserStatus
+	}
+	return nil
+}
+
+type UserStatus struct {
+	UserId               string   `protobuf:"bytes,1,opt,name=userId,proto3" json:"userId,omitempty"`
+	Status               string   `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *UserStatus) Reset()         { *m = UserStatus{} }
+func (m *UserStatus) String() string { return proto.CompactTextString(m) }
+func (*UserStatus) ProtoMessage()    {}
+func (*UserStatus) Descriptor() ([]byte, []int) {
+	return fileDescriptor_727fd833651e2ed7, []int{7}
+}
+
+func (m *UserStatus) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UserStatus.Unmarshal(m, b)
+}
+func (m *UserStatus) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UserStatus.Marshal(b, m, deterministic)
+}
+func (m *UserStatus) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UserStatus.Merge(m, src)
+}
+func (m *UserStatus) XXX_Size() int {
+	return xxx_messageInfo_UserStatus.Size(m)
+}
+func (m *UserStatus) XXX_DiscardUnknown() {
+	xxx_messageInfo_UserStatus.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UserStatus proto.InternalMessageInfo
+
+func (m *UserStatus) GetUserId() string {
+	if m != nil {
+		return m.UserId
+	}
+	return ""
+}
+
+func (m *UserStatus) GetStatus() string {
+	if m != nil {
+		return m.Status
+	}
+	return ""
+}
+
+type PermitObject struct {
+	ReqID                string   `protobuf:"bytes,1,opt,name=reqID,proto3" json:"reqID,omitempty"`
+	FileID               string   `protobuf:"bytes,2,opt,name=fileID,proto3" json:"fileID,omitempty"`
+	UserID               string   `protobuf:"bytes,3,opt,name=userID,proto3" json:"userID,omitempty"`
+	Status               Status   `protobuf:"varint,4,opt,name=status,proto3,enum=permit.Status" json:"status,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *PermitObject) Reset()         { *m = PermitObject{} }
+func (m *PermitObject) String() string { return proto.CompactTextString(m) }
+func (*PermitObject) ProtoMessage()    {}
+func (*PermitObject) Descriptor() ([]byte, []int) {
+	return fileDescriptor_727fd833651e2ed7, []int{8}
+}
+
+func (m *PermitObject) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_PermitObject.Unmarshal(m, b)
+}
+func (m *PermitObject) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_PermitObject.Marshal(b, m, deterministic)
+}
+func (m *PermitObject) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PermitObject.Merge(m, src)
+}
+func (m *PermitObject) XXX_Size() int {
+	return xxx_messageInfo_PermitObject.Size(m)
+}
+func (m *PermitObject) XXX_DiscardUnknown() {
+	xxx_messageInfo_PermitObject.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_PermitObject proto.InternalMessageInfo
+
+func (m *PermitObject) GetReqID() string {
+	if m != nil {
+		return m.ReqID
+	}
+	return ""
+}
+
+func (m *PermitObject) GetFileID() string {
+	if m != nil {
+		return m.FileID
+	}
+	return ""
+}
+
+func (m *PermitObject) GetUserID() string {
+	if m != nil {
+		return m.UserID
+	}
+	return ""
+}
+
+func (m *PermitObject) GetStatus() Status {
+	if m != nil {
+		return m.Status
+	}
+	return Status_NONE
+}
+
+func init() {
+	proto.RegisterEnum("permit.Status", Status_name, Status_value)
+	proto.RegisterType((*CreatePermitRequest)(nil), "permit.CreatePermitRequest")
+	proto.RegisterType((*User)(nil), "permit.User")
+	proto.RegisterType((*CreatePermitResponse)(nil), "permit.CreatePermitResponse")
+	proto.RegisterType((*UpdatePermitStatusRequest)(nil), "permit.UpdatePermitStatusRequest")
+	proto.RegisterType((*UpdatePermitStatusResponse)(nil), "permit.UpdatePermitStatusResponse")
+	proto.RegisterType((*GetPermitByFileIDRequest)(nil), "permit.GetPermitByFileIDRequest")
+	proto.RegisterType((*GetPermitByFileIDResponse)(nil), "permit.GetPermitByFileIDResponse")
+	proto.RegisterType((*UserStatus)(nil), "permit.UserStatus")
+	proto.RegisterType((*PermitObject)(nil), "permit.PermitObject")
+}
+
 func init() { proto.RegisterFile("permit.proto", fileDescriptor_727fd833651e2ed7) }
 
 var fileDescriptor_727fd833651e2ed7 = []byte{
-	// 51 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0x29, 0x48, 0x2d, 0xca,
-	0xcd, 0x2c, 0xd1, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0x83, 0xf0, 0x8c, 0x38, 0xb8, 0xa0,
-	0xac, 0x24, 0x36, 0xb0, 0x84, 0x31, 0x20, 0x00, 0x00, 0xff, 0xff, 0x5b, 0xcc, 0x13, 0xb4, 0x28,
-	0x00, 0x00, 0x00,
+	// 477 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x84, 0x54, 0x4d, 0x6f, 0xda, 0x40,
+	0x10, 0x8d, 0x8d, 0xb1, 0x60, 0xea, 0x5a, 0x74, 0x1a, 0x45, 0x8e, 0xcb, 0x81, 0xec, 0x21, 0x8a,
+	0x7a, 0xc8, 0xc1, 0xbd, 0x56, 0xaa, 0xda, 0x42, 0x23, 0x54, 0x09, 0xa8, 0x53, 0x2a, 0xb5, 0x52,
+	0x0f, 0x0e, 0x2c, 0x62, 0x2b, 0x82, 0xc9, 0xee, 0x72, 0x88, 0xd4, 0x1f, 0xd1, 0xbf, 0xd1, 0x7f,
+	0x59, 0x79, 0x3f, 0x8c, 0xd3, 0x18, 0x72, 0xe3, 0xcd, 0x9b, 0x9d, 0x8f, 0xf7, 0xc6, 0x40, 0xb0,
+	0xa1, 0xfc, 0x96, 0xc9, 0xcb, 0x0d, 0xcf, 0x65, 0x8e, 0xbe, 0x46, 0xe4, 0xaf, 0x03, 0x2f, 0x3f,
+	0x72, 0x9a, 0x49, 0x3a, 0x51, 0x81, 0x94, 0xde, 0x6d, 0xa9, 0x90, 0x78, 0x02, 0xfe, 0x82, 0xad,
+	0xe8, 0xb0, 0x1f, 0x39, 0x3d, 0xe7, 0xa2, 0x9d, 0x1a, 0x84, 0x31, 0xb4, 0xc4, 0x32, 0xe3, 0x94,
+	0x0f, 0xfb, 0x91, 0xab, 0x98, 0x12, 0x23, 0x81, 0xe6, 0x56, 0x50, 0x2e, 0xa2, 0x46, 0xaf, 0x71,
+	0xf1, 0x2c, 0x09, 0x2e, 0x4d, 0xc7, 0xa9, 0xa0, 0x3c, 0xd5, 0x14, 0x9e, 0x43, 0x38, 0x5b, 0x65,
+	0x42, 0xb0, 0x05, 0x9b, 0x65, 0x92, 0xe5, 0xeb, 0xc8, 0x53, 0x55, 0xfe, 0x8b, 0x22, 0x82, 0xc7,
+	0xd6, 0x8b, 0x3c, 0x6a, 0x2a, 0x56, 0xfd, 0x26, 0x13, 0xf0, 0x8a, 0x52, 0x18, 0x82, 0xcb, 0xe6,
+	0x66, 0x2e, 0x97, 0xcd, 0x8b, 0x99, 0x16, 0xdb, 0xd5, 0x6a, 0x94, 0xdd, 0x52, 0x3b, 0x93, 0xc5,
+	0xd8, 0x85, 0xf6, 0x92, 0x32, 0x9e, 0xf1, 0xd9, 0xf2, 0x3e, 0x6a, 0x28, 0x72, 0x17, 0x20, 0x27,
+	0x70, 0xfc, 0x70, 0x79, 0xb1, 0xc9, 0xd7, 0x82, 0x92, 0xef, 0x70, 0x3a, 0xdd, 0xcc, 0xcb, 0xf8,
+	0xb5, 0xcc, 0xe4, 0x56, 0x58, 0x69, 0x8e, 0xa1, 0xc9, 0xe9, 0x5d, 0xa9, 0x8c, 0x06, 0x78, 0x0e,
+	0xbe, 0x50, 0x69, 0x6a, 0x84, 0x30, 0x09, 0xed, 0xf6, 0xe6, 0xb1, 0x61, 0x49, 0x17, 0xe2, 0xba,
+	0xd2, 0xa6, 0x71, 0x02, 0xd1, 0x15, 0x95, 0x9a, 0xfa, 0x70, 0xff, 0x49, 0x69, 0xfe, 0x84, 0x25,
+	0x64, 0x0c, 0xa7, 0x35, 0x6f, 0x74, 0x41, 0x4c, 0x00, 0x0a, 0xe1, 0x75, 0x9b, 0xc8, 0x51, 0xc6,
+	0x60, 0xd5, 0x18, 0x33, 0x40, 0x25, 0x8b, 0xbc, 0x05, 0xd8, 0x31, 0x45, 0xdb, 0x82, 0x1b, 0x5a,
+	0xc5, 0x0d, 0x2a, 0xe2, 0x95, 0x85, 0xdb, 0xe5, 0x82, 0xbf, 0x21, 0xd0, 0xb3, 0x8c, 0x6f, 0x7e,
+	0xd1, 0xd9, 0x3e, 0xb9, 0x76, 0xcb, 0xb8, 0x0f, 0xee, 0xcb, 0x76, 0xeb, 0x1b, 0xb3, 0x0c, 0xaa,
+	0xc8, 0xeb, 0x1d, 0x92, 0xf7, 0xf5, 0x3b, 0xf0, 0xcd, 0xdc, 0x2d, 0xf0, 0x46, 0xe3, 0xd1, 0xa0,
+	0x73, 0x84, 0x21, 0x40, 0x3a, 0xf8, 0x32, 0x1d, 0x5c, 0x7f, 0x1d, 0x8e, 0xae, 0x3a, 0x0e, 0x3e,
+	0x87, 0xf6, 0xfb, 0xc9, 0x24, 0x1d, 0x7f, 0x2b, 0xa0, 0x8b, 0x01, 0xb4, 0x34, 0x1c, 0xf4, 0x3b,
+	0x8d, 0xe4, 0x8f, 0x0b, 0xe6, 0xdb, 0xc0, 0xcf, 0x10, 0x54, 0xaf, 0x03, 0x5f, 0xd9, 0x9e, 0x35,
+	0x1f, 0x4c, 0xdc, 0xad, 0x27, 0x8d, 0xaf, 0x47, 0xf8, 0x13, 0xf0, 0xb1, 0xef, 0x78, 0x56, 0x5a,
+	0xb1, 0xef, 0xdc, 0x62, 0x72, 0x28, 0xa5, 0x2c, 0xff, 0x03, 0x5e, 0x3c, 0x3a, 0x02, 0xec, 0xd9,
+	0xa7, 0xfb, 0x6e, 0x2a, 0x3e, 0x3b, 0x90, 0x61, 0x6b, 0xdf, 0xf8, 0xea, 0x2f, 0xe3, 0xcd, 0xbf,
+	0x00, 0x00, 0x00, 0xff, 0xff, 0x78, 0xaa, 0x93, 0xb7, 0x42, 0x04, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -44,6 +539,9 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type PermitClient interface {
+	CreatePermit(ctx context.Context, in *CreatePermitRequest, opts ...grpc.CallOption) (*CreatePermitResponse, error)
+	UpdatePermitStatus(ctx context.Context, in *UpdatePermitStatusRequest, opts ...grpc.CallOption) (*UpdatePermitStatusResponse, error)
+	GetPermitByFileID(ctx context.Context, in *GetPermitByFileIDRequest, opts ...grpc.CallOption) (*GetPermitByFileIDResponse, error)
 }
 
 type permitClient struct {
@@ -54,22 +552,129 @@ func NewPermitClient(cc *grpc.ClientConn) PermitClient {
 	return &permitClient{cc}
 }
 
+func (c *permitClient) CreatePermit(ctx context.Context, in *CreatePermitRequest, opts ...grpc.CallOption) (*CreatePermitResponse, error) {
+	out := new(CreatePermitResponse)
+	err := c.cc.Invoke(ctx, "/permit.permit/CreatePermit", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *permitClient) UpdatePermitStatus(ctx context.Context, in *UpdatePermitStatusRequest, opts ...grpc.CallOption) (*UpdatePermitStatusResponse, error) {
+	out := new(UpdatePermitStatusResponse)
+	err := c.cc.Invoke(ctx, "/permit.permit/UpdatePermitStatus", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *permitClient) GetPermitByFileID(ctx context.Context, in *GetPermitByFileIDRequest, opts ...grpc.CallOption) (*GetPermitByFileIDResponse, error) {
+	out := new(GetPermitByFileIDResponse)
+	err := c.cc.Invoke(ctx, "/permit.permit/GetPermitByFileID", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PermitServer is the server API for Permit service.
 type PermitServer interface {
+	CreatePermit(context.Context, *CreatePermitRequest) (*CreatePermitResponse, error)
+	UpdatePermitStatus(context.Context, *UpdatePermitStatusRequest) (*UpdatePermitStatusResponse, error)
+	GetPermitByFileID(context.Context, *GetPermitByFileIDRequest) (*GetPermitByFileIDResponse, error)
 }
 
 // UnimplementedPermitServer can be embedded to have forward compatible implementations.
 type UnimplementedPermitServer struct {
 }
 
+func (*UnimplementedPermitServer) CreatePermit(ctx context.Context, req *CreatePermitRequest) (*CreatePermitResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreatePermit not implemented")
+}
+func (*UnimplementedPermitServer) UpdatePermitStatus(ctx context.Context, req *UpdatePermitStatusRequest) (*UpdatePermitStatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdatePermitStatus not implemented")
+}
+func (*UnimplementedPermitServer) GetPermitByFileID(ctx context.Context, req *GetPermitByFileIDRequest) (*GetPermitByFileIDResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPermitByFileID not implemented")
+}
+
 func RegisterPermitServer(s *grpc.Server, srv PermitServer) {
 	s.RegisterService(&_Permit_serviceDesc, srv)
+}
+
+func _Permit_CreatePermit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreatePermitRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PermitServer).CreatePermit(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/permit.permit/CreatePermit",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PermitServer).CreatePermit(ctx, req.(*CreatePermitRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Permit_UpdatePermitStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdatePermitStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PermitServer).UpdatePermitStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/permit.permit/UpdatePermitStatus",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PermitServer).UpdatePermitStatus(ctx, req.(*UpdatePermitStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Permit_GetPermitByFileID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPermitByFileIDRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PermitServer).GetPermitByFileID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/permit.permit/GetPermitByFileID",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PermitServer).GetPermitByFileID(ctx, req.(*GetPermitByFileIDRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 var _Permit_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "permit.permit",
 	HandlerType: (*PermitServer)(nil),
-	Methods:     []grpc.MethodDesc{},
-	Streams:     []grpc.StreamDesc{},
-	Metadata:    "permit.proto",
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "CreatePermit",
+			Handler:    _Permit_CreatePermit_Handler,
+		},
+		{
+			MethodName: "UpdatePermitStatus",
+			Handler:    _Permit_UpdatePermitStatus_Handler,
+		},
+		{
+			MethodName: "GetPermitByFileID",
+			Handler:    _Permit_GetPermitByFileID_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "permit.proto",
 }

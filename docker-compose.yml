@@ -1,0 +1,56 @@
+version: '2'
+services:
+  mongo:
+    image: mongo:4.2
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./data/db:/data/db
+  permit-service:
+    image: permit-service:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      PORT: 8080
+      HOST_NAME: permit-service
+      PMTS_MONGO_HOST: mongodb://mongo:27017/permit
+      PMTS_GRANT_TYPE: client_credentials
+      PMTS_AUDIENCE: kartoffel
+      PMTS_SPIKE_SERVICE: spike-service:8080
+      PMTS_ELASTIC_APM_IGNORE_URLS: '/grpc.health.v1.Health/Check'
+      ELASTICSEARCH_URL: http://localhost:9200
+      LOG_INDEX: kdrive
+      LOG_LEVEL: debug
+      HEALTH_CHECK_INTERVAL: 5
+      ELASTIC_APM_SERVER_URL: 'http://localhost:8200'
+      ELASTIC_APM_SERVICE_NAME: 'permit-service'
+      ELASTIC_APM_SERVICE_VERSION: '0.1'
+      ELASTIC_APM_ENVIRONMENT: 'development'
+      ELASTIC_APM_ACTIVE: 'true'
+      ELASTIC_APM_CAPTURE_BODY: 'all'
+      ELASTIC_APM_METRICS_INTERVAL: '10s'
+    ports:
+      - 8080:8080
+    depends_on:
+      - mongo
+      - spike-service
+  spike-service:
+    image: spike-service:latest
+    environment:
+      AUDIENCE: "AUDIENCE"
+      SPIKE_CLIENT_ID: "SPIKE_CLIENT_ID"
+      SPIKE_CLIENT_SECRET: "SPIKE_CLIENT_SECRET"
+      REDIS_URL: 'redis://redis:6379'
+      SPIKE_TOKEN_URL: "https://spike.westeurope.cloudapp.azure.com:1337/oauth2/token"
+      SPIKE_PUBLIC_KEY_FULL_PATH: "/usr/src/app/utils/publickey.pem"
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+    depends_on:
+      - redis
+    ports:
+      - '8081:8080'
+  redis:
+    image: 'redis:alpine'
+    ports:
+      - '6379:6379'
+      
