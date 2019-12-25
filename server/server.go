@@ -36,6 +36,7 @@ const (
 	configSpikeService                 = "spike_service"
 	configGrantType                    = "grant_type"
 	configAudience                     = "audience"
+	configApprovalUrl                  = "approval_url"
 )
 
 // PermitServer is a structure that holds the permit grpc server
@@ -58,6 +59,7 @@ func init() {
 	viper.SetDefault(configMongoClientPingTimeout, 10)
 	viper.SetDefault(configGrantType, "client_credentials")
 	viper.SetDefault(configAudience, "kartoffel")
+	viper.SetDefault(configApprovalUrl, "approval:8080")
 	viper.SetEnvPrefix(envPrefix)
 	viper.AutomaticEnv()
 }
@@ -121,7 +123,9 @@ func NewServer(logger *logrus.Logger) *PermitServer {
 	}
 
 	// Create a permit service and register it on the grpc server.
-	permitService := service.NewService(controller, logger, spikeConn, viper.GetString(configGrantType), viper.GetString(configAudience))
+	permitService := service.NewService(
+		controller, logger, spikeConn, viper.GetString(configGrantType),
+		viper.GetString(configAudience), viper.GetString(configApprovalUrl))
 	pb.RegisterPermitServer(grpcServer, permitService)
 
 	// Create a health server and register it on the grpc server.
