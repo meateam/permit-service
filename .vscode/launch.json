@@ -9,8 +9,28 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${fileDirname}",
-            "env": {},
+            "program": "${workspaceFolder}",
+            "env": {
+                "PMTS_PORT": 8085,
+                "HOST_NAME": "permit-service",
+                "PMTS_MONGO_HOST": "mongodb://localhost:27017/permit",
+                "PMTS_GRANT_TYPE": "client_credentials",
+                "PMTS_AUDIENCE": "_LCF5avgIpoXSWhY5Jl8mMi0Q~4_~R",
+                "PMTS_APPROVAL_URL": "http://23.102.32.203/api/v1/request",
+                "PMTS_SPIKE_SERVICE": "localhost:8081",
+                "PMTS_ELASTIC_APM_IGNORE_URLS": "/grpc.health.v1.Health/Check",
+                "ELASTICSEARCH_URL": "http://localhost:9200",
+                "LOG_INDEX": "kdrive",
+                "LOG_LEVEL": "debug",
+                "HEALTH_CHECK_INTERVAL": 5,
+                "ELASTIC_APM_SERVER_URL": "http://localhost:8200",
+                "ELASTIC_APM_SERVICE_NAME": "permit-service",
+                "ELASTIC_APM_SERVICE_VERSION": "0.1",
+                "ELASTIC_APM_ENVIRONMENT": "development",
+                "ELASTIC_APM_ACTIVE": "true",
+                "ELASTIC_APM_CAPTURE_BODY": "all",
+                "ELASTIC_APM_METRICS_INTERVAL": "10s"
+            },
             "args": []
         }
     ]

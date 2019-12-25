@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	pb "github.com/meateam/permit-service/proto"
 	"github.com/meateam/permit-service/service"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -192,7 +191,7 @@ func (s MongoStore) Create(ctx context.Context, permit service.Permit) (service.
 }
 
 // UpdateStatus updates all permits with a given reqID to a given status
-func (s MongoStore) UpdateStatus(ctx context.Context, reqID string, status pb.Status) error {
+func (s MongoStore) UpdateStatus(ctx context.Context, reqID string, status string) error {
 	collection := s.DB.Collection(PermitCollectionName)
 	if reqID == "" {
 		return fmt.Errorf("reqID is required")

@@ -1,8 +1,11 @@
 package service
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"sync"
 	"time"
 
@@ -13,6 +16,11 @@ import (
 	"google.golang.org/grpc"
 )
 
+const (
+	// StatusPending is the status of a pending request
+	StatusPending = "pending"
+)
+
 // Service is the structure used for handling
 type Service struct {
 	spikeClient spb.SpikeClient
@@ -20,16 +28,24 @@ type Service struct {
 	logger      *logrus.Logger
 	grantType   string
 	audience    string
+	approvalURL string
 }
 
 // ApprovalReqType is the struct sent as json to the approval service
 type ApprovalReqType struct {
-	reqID          string
-	fileID         string
-	sharerID       string
-	users          []string
-	classification string
-	info           string
+	ID             string     `json:"id"`
+	From           string     `json:"from"`
+	Approvers      []string   `json:"approvers"`
+	To             []UserType `json:"to"`
+	FileID         string     `json:"fileId"`
+	Info           string     `json:"info"`
+	Classification string     `json:"classification"`
+}
+
+// UserType is the struct that contains id and fullname of a user
+type UserType struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 // HealthCheck checks the health of the service, and returns a boolean accordingly.
@@ -46,8 +62,8 @@ func (s *Service) HealthCheck(mongoClientPingTimeout time.Duration) bool {
 }
 
 // NewService creates a Service and returns it.
-func NewService(controller Controller, logger *logrus.Logger, spikeConn *grpc.ClientConn, grantType string, audience string) Service {
-	s := Service{controller: controller, logger: logger, grantType: grantType, audience: audience}
+func NewService(controller Controller, logger *logrus.Logger, spikeConn *grpc.ClientConn, grantType string, audience string, approvalURL string) Service {
+	s := Service{controller: controller, logger: logger, grantType: grantType, audience: audience, approvalURL: approvalURL}
 	s.spikeClient = spb.NewSpikeClient(spikeConn)
 	return s
 }
@@ -57,8 +73,9 @@ func (s Service) CreatePermit(ctx context.Context, req *pb.CreatePermitRequest) 
 	fileID := req.GetFileID()
 	sharerID := req.GetSharerID()
 	users := req.GetUsers()
-	// classification := req.GetClassification()
-	// info := req.GetInfo()
+	classification := req.GetClassification()
+	info := req.GetInfo()
+	approvers := req.GetApprovers()
 
 	usersNum := len(users)
 
@@ -83,15 +100,19 @@ func (s Service) CreatePermit(ctx context.Context, req *pb.CreatePermitRequest) 
 	var wg sync.WaitGroup
 	wg.Add(usersNum)
 
-	var userIDs []string
+	var userIDs []UserType
 	for i := 0; i < usersNum; i++ {
-		userIDs = append(userIDs, users[i].GetId())
+		user := UserType{
+			ID:   users[i].GetId(),
+			Name: users[i].GetFullName(),
+		}
+		userIDs = append(userIDs, user)
 	}
 
 	for i := 0; i < usersNum; i++ {
 		go func(i int) {
 			defer wg.Done()
-			_, err := s.controller.CreatePermit(ctx, reqID.String(), fileID, userIDs[i], pb.Status_NONE)
+			_, err := s.controller.CreatePermit(ctx, reqID.String(), fileID, userIDs[i].ID, StatusPending)
 			if err != nil {
 				_ = fmt.Errorf("failed creating permit %s %s %v", fileID, users[i].GetId(), err)
 			}
@@ -104,35 +125,42 @@ func (s Service) CreatePermit(ctx context.Context, req *pb.CreatePermitRequest) 
 		Audience:  s.audience,
 	}
 
-	token, err := s.spikeClient.GetSpikeToken(ctx, getSpikeTokenRequest)
+	tokenRes, err := s.spikeClient.GetSpikeToken(ctx, getSpikeTokenRequest)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting spike token %v", err)
 	}
-	// TODO: what to do?
-	fmt.Println(token)
 
-	// Call Approval service with the required parameters.
-	// requestBody, err := json.Marshal(
-	// 	&ApprovalReqType{
-	// 		reqID:          reqID.String(),
-	// 		fileID:         fileID,
-	// 		sharerID:       sharerID,
-	// 		users:          userIDs,
-	// 		classification: classification,
-	// 		info:           info,
-	// 	})
+	token := tokenRes.GetToken()
 
-	// if err != nil {
-	// 	return nil, fmt.Errorf("failed creating json object, %v", err)
-	// }
+	request := ApprovalReqType{
+		ID:             reqID.String(),
+		From:           sharerID,
+		Approvers:      approvers,
+		To:             userIDs,
+		FileID:         fileID,
+		Info:           info,
+		Classification: classification,
+	}
 
-	// // TODO: input the correct envars
-	// resp, err := http.Post("https://todo.com/bliblu", "application/json", bytes.NewBuffer(requestBody))
-	// if err != nil {
-	// 	return nil, fmt.Errorf("error while requesting from approval service %v", err)
-	// }
+	requestBody, err := json.Marshal(request)
 
-	// defer resp.Body.Close()
+	if err != nil {
+		return nil, fmt.Errorf("failed creating json object, %v", err)
+	}
+
+	client := &http.Client{}
+	httpReq, err := http.NewRequest("POST", s.approvalURL, bytes.NewBuffer(requestBody))
+	if err != nil {
+		return nil, fmt.Errorf("error while creating http request to approval, %v", err)
+	}
+	httpReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	httpReq.Header.Set("Content-Type", "application/json")
+	resp, err := client.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("error while requesting from approval service %v", err)
+	}
+
+	defer resp.Body.Close()
 
 	return &pb.CreatePermitResponse{}, nil
 }

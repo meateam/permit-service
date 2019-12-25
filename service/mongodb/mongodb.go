@@ -11,7 +11,7 @@ import (
 type BSON struct {
 	ID     primitive.ObjectID `bson:"_id,omitempty"`
 	FileID string             `bson:"fileID, omitempty"`
-	Status pb.Status          `bson:"status,omitempty"`
+	Status string             `bson:"status,omitempty"`
 	UserID string             `bson:"userID,omitempty"`
 	ReqID  string             `bson:"reqID,omitempty"`
 }
@@ -60,12 +60,12 @@ func (b *BSON) SetFileID(fileID string) error {
 }
 
 // GetStatus returns b.Status.
-func (b BSON) GetStatus() pb.Status {
+func (b BSON) GetStatus() string {
 	return b.Status
 }
 
 // SetStatus sets b.SharerID to status.
-func (b *BSON) SetStatus(status pb.Status) error {
+func (b *BSON) SetStatus(status string) error {
 	if b == nil {
 		panic("b == nil")
 	}

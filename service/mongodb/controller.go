@@ -34,7 +34,7 @@ func (c Controller) HealthCheck(ctx context.Context) (bool, error) {
 }
 
 // CreatePermit creates a permit in store and returns its unique ID.
-func (c Controller) CreatePermit(ctx context.Context, reqID string, fileID string, userID string, status pb.Status) (service.Permit, error) {
+func (c Controller) CreatePermit(ctx context.Context, reqID string, fileID string, userID string, status string) (service.Permit, error) {
 	permit := &BSON{FileID: fileID, ReqID: reqID, UserID: userID, Status: status}
 	createdPermission, err := c.store.Create(ctx, permit)
 	if err != nil {
@@ -64,7 +64,7 @@ func (c Controller) GetPermitsByFileID(ctx context.Context, fileID string) ([]*p
 	userStatuses := make([]*pb.UserStatus, 0, len(permits))
 
 	for _, permit := range permits {
-		userStatus := &pb.UserStatus{UserId: permit.GetUserID(), Status: permit.GetStatus().String()}
+		userStatus := &pb.UserStatus{UserId: permit.GetUserID(), Status: permit.GetStatus()}
 		userStatuses = append(userStatuses, userStatus)
 	}
 
@@ -72,7 +72,7 @@ func (c Controller) GetPermitsByFileID(ctx context.Context, fileID string) ([]*p
 }
 
 // UpdatePermitStatus todo
-func (c Controller) UpdatePermitStatus(ctx context.Context, reqID string, status pb.Status) (bool, error) {
+func (c Controller) UpdatePermitStatus(ctx context.Context, reqID string, status string) (bool, error) {
 	err := c.store.UpdateStatus(ctx, reqID, status)
 	if err != nil {
 		return false, fmt.Errorf("updating status %v", err)
