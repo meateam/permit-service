@@ -18,8 +18,8 @@ type Permit interface {
 	GetUserID() string
 	SetUserID(userID string) error
 
-	GetStatus() pb.Status
-	SetStatus(status pb.Status) error
+	GetStatus() string
+	SetStatus(status string) error
 
 	MarshalProto(permit *pb.PermitObject) error
 }
