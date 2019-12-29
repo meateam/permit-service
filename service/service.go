@@ -180,6 +180,22 @@ func (s Service) GetPermitByFileID(ctx context.Context, req *pb.GetPermitByFileI
 	return &pb.GetPermitByFileIDResponse{UserStatus: userStatuses}, nil
 }
 
+// HasPermit is the request handler for checking if a permit exists for fileID and userID.
+func (s Service) HasPermit(ctx context.Context, req *pb.HasPermitRequest) (*pb.HasPermitResponse, error) {
+	fileID := req.GetFileID()
+	userID := req.GetUserID()
+	if fileID == "" || userID == "" {
+		return nil, fmt.Errorf("fileID and userID are required")
+	}
+
+	hasPermit, err := s.controller.HasPermit(ctx, fileID, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed in reqesting permit %v", err)
+	}
+
+	return &pb.HasPermitResponse{HasPermit: hasPermit}, nil
+}
+
 // UpdatePermitStatus is the request handler for updating the status of a given permit.
 func (s Service) UpdatePermitStatus(ctx context.Context, req *pb.UpdatePermitStatusRequest) (*pb.UpdatePermitStatusResponse, error) {
 	reqID := req.GetReqID()

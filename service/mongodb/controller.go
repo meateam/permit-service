@@ -71,6 +71,32 @@ func (c Controller) GetPermitsByFileID(ctx context.Context, fileID string) ([]*p
 	return userStatuses, nil
 }
 
+// HasPermit returns true if a permit exists with the given fileID and userID, and false if it does not.
+func (c Controller) HasPermit(ctx context.Context, fileID string, userID string) (bool, error) {
+	filter := bson.D{
+		bson.E{
+			Key:   PermitBSONFileIDField,
+			Value: fileID,
+		},
+		bson.E{
+			Key:   PermitBSONUserIDField,
+			Value: userID,
+		},
+	}
+
+	_, err := c.store.Get(ctx, filter)
+	if err != nil && err != mongo.ErrNoDocuments {
+		return false, err
+	}
+
+	if err == mongo.ErrNoDocuments {
+		return false, nil
+	}
+
+	return true, nil
+
+}
+
 // UpdatePermitStatus todo
 func (c Controller) UpdatePermitStatus(ctx context.Context, reqID string, status string) (bool, error) {
 	err := c.store.UpdateStatus(ctx, reqID, status)

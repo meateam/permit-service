@@ -74,8 +74,8 @@ func (s MongoStore) HealthCheck(ctx context.Context) (bool, error) {
 
 // Get finds one permit that matches filter,
 // if successful returns the permit, and a nil error,
-// if the permit is not found it would return nil and unimplemented error,
-// otherwise returns nil and non-nil error if any occured.
+// if the permit is not found it would return nil and mongo.ErrNoDocuments error,
+// otherwise returns nil and non-nil error if any occurred.
 func (s MongoStore) Get(ctx context.Context, filter interface{}) (service.Permit, error) {
 	collection := s.DB.Collection(PermitCollectionName)
 
@@ -90,11 +90,11 @@ func (s MongoStore) Get(ctx context.Context, filter interface{}) (service.Permit
 
 // GetAll finds all permits that matches filter,
 // if successful returns the permits, and a nil error,
-// otherwise returns nil and non-nil error if any occured.
+// otherwise returns nil and non-nil error if any occurred.
 func (s MongoStore) GetAll(ctx context.Context, filter interface{}) ([]service.Permit, error) {
 	collection := s.DB.Collection(PermitCollectionName)
 
-	// cur is the cursor for itarating over the permits.
+	// cur is the cursor for iterating over the permits.
 	cur, err := collection.Find(ctx, filter)
 	defer cur.Close(ctx)
 	if err != nil {
@@ -122,7 +122,7 @@ func (s MongoStore) GetAll(ctx context.Context, filter interface{}) ([]service.P
 // Create creates a permit of a file to a user,
 // If permit already exists then its updated to have the permit values,
 // If successful returns the permit and a nil error,
-// otherwise returns empty string and non-nil error if any occured.
+// otherwise returns empty string and non-nil error if any occurred.
 func (s MongoStore) Create(ctx context.Context, permit service.Permit) (service.Permit, error) {
 	collection := s.DB.Collection(PermitCollectionName)
 	fileID := permit.GetFileID()

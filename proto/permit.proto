@@ -6,6 +6,7 @@ service permit {
     rpc CreatePermit(CreatePermitRequest) returns (CreatePermitResponse) {}
     rpc UpdatePermitStatus(UpdatePermitStatusRequest) returns (UpdatePermitStatusResponse) {}
     rpc GetPermitByFileID(GetPermitByFileIDRequest) returns (GetPermitByFileIDResponse) {}
+    rpc HasPermit(HasPermitRequest) returns (HasPermitResponse) {}
 }
 
 message CreatePermitRequest {
@@ -43,6 +44,15 @@ message GetPermitByFileIDRequest {
 
 message GetPermitByFileIDResponse {
     repeated UserStatus userStatus = 1;
+}
+
+message HasPermitRequest {
+    string fileID = 1;
+    string userID = 2;
+}
+
+message HasPermitResponse {
+    bool hasPermit = 1;
 }
 
 message UserStatus {
