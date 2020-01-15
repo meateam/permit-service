@@ -7,7 +7,7 @@ services:
     volumes:
       - ../data/db:/data/db
   permit-service:
-    image: permit-service:latest
+    image:  bluehub.azurecr.io/meateam/permit-service:1.1
     # build:
     #   context: .
     #   dockerfile: Dockerfile
@@ -37,7 +37,7 @@ services:
       - mongo
       - spike-service
   spike-service:
-    image: spike-service:latest
+    image: bluehub.azurecr.io/meateam/spike-service:1.1
     environment:
       AUDIENCE: "AUDIENCE"
       SPIKE_CLIENT_ID: "EPBpjCiczupCXZgBEq3ARZCinUt4LSXtOsVrI1Ub"

@@ -19,6 +19,12 @@ import (
 const (
 	// StatusPending is the status of a pending request
 	StatusPending = "pending"
+
+	// StatusApproved is the status of an approved request
+	StatusApproved = "approved"
+
+	// StatusDenied is the status of a denied request
+	StatusDenied = "denied"
 )
 
 // Service is the structure used for handling
@@ -180,6 +186,18 @@ func (s Service) GetPermitByFileID(ctx context.Context, req *pb.GetPermitByFileI
 	return &pb.GetPermitByFileIDResponse{UserStatus: userStatuses}, nil
 }
 
+// GetAllPermits is the request handler for getting all permits.
+func (s Service) GetAllPermits(ctx context.Context) (*pb.GetAllPermitsResponse, error) {
+
+	permits, err := s.controller.GetAllPermits(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve permit %v", err)
+	}
+	c.ShouldBindJSON(permits)
+
+	return &pb.GetAllPermitsResponse{Permits: permits}, nil
+}
+
 // HasPermit is the request handler for checking if a permit exists for fileID and userID.
 func (s Service) HasPermit(ctx context.Context, req *pb.HasPermitRequest) (*pb.HasPermitResponse, error) {
 	fileID := req.GetFileID()
@@ -215,4 +233,9 @@ func (s Service) UpdatePermitStatus(ctx context.Context, req *pb.UpdatePermitSta
 	}
 
 	return &pb.UpdatePermitStatusResponse{}, nil
+}
+
+func (s Service) UpdateAllStatuses(ctx context.Context) (bool, error) {
+
+	return true, nil
 }

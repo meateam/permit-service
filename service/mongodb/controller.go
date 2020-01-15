@@ -36,11 +36,11 @@ func (c Controller) HealthCheck(ctx context.Context) (bool, error) {
 // CreatePermit creates a permit in store and returns its unique ID.
 func (c Controller) CreatePermit(ctx context.Context, reqID string, fileID string, userID string, status string) (service.Permit, error) {
 	permit := &BSON{FileID: fileID, ReqID: reqID, UserID: userID, Status: status}
-	createdPermission, err := c.store.Create(ctx, permit)
+	createdPermit, err := c.store.Create(ctx, permit)
 	if err != nil {
 		return nil, fmt.Errorf("failed creating permit %v", err)
 	}
-	return createdPermission, nil
+	return createdPermit, nil
 }
 
 // GetPermitsByFileID returns the statuses of the permits of each user associated with the fileID.
@@ -69,6 +69,36 @@ func (c Controller) GetPermitsByFileID(ctx context.Context, fileID string) ([]*p
 	}
 
 	return userStatuses, nil
+}
+
+// GetAllPermits returns all permits in the db
+func (c Controller) GetAllPermits(ctx context.Context) ([]service.Permit, error) {
+	// filter := bson.D{
+	// 	{"$not", []interface{}{
+	// 		bson.E{
+	// 			Key:   PermitBSONStatusField,
+	// 			Value: "",
+	// 		},
+	// 	}},
+	// }
+	var filter interface{}
+
+	permits, err := c.store.GetAll(ctx, filter)
+	if err != nil && err != mongo.ErrNoDocuments {
+		return nil, err
+	}
+
+	if err == mongo.ErrNoDocuments {
+		return nil, status.Error(codes.NotFound, "permits not found")
+	}
+	populatedPermits := []*pb.GetAllPermitsResponse{}
+
+	for index, permit := range permits {
+		newPermit := *pb.PermitObject{}
+		populatedPermits.append(permit.MarshalProto())
+	}
+
+	return permits, nil
 }
 
 // HasPermit returns true if a permit exists with the given fileID and userID, and false if it does not.
