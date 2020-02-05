@@ -79,6 +79,8 @@ func (s Service) CreatePermit(ctx context.Context, req *pb.CreatePermitRequest) 
 	info := req.GetInfo()
 	approvers := req.GetApprovers()
 
+	approvers = append(approvers, sharerID) // add the sharer to the approvers array
+
 	usersNum := len(users)
 
 	if fileID == "" {
