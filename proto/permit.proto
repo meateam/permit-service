@@ -16,6 +16,7 @@ message CreatePermitRequest {
     string classification = 4;
     string info = 5;
     repeated string approvers = 6;
+    string fileName = 7;
 }
 
 message User {
