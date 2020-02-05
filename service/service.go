@@ -38,6 +38,7 @@ type ApprovalReqType struct {
 	Approvers      []string   `json:"approvers"`
 	To             []UserType `json:"to"`
 	FileID         string     `json:"fileId"`
+	FileName       string     `json:"fileName"`
 	Info           string     `json:"info"`
 	Classification string     `json:"classification"`
 }
@@ -71,6 +72,7 @@ func NewService(controller Controller, logger *logrus.Logger, spikeConn *grpc.Cl
 // CreatePermit is the request handler for creating a permit of a file to user.
 func (s Service) CreatePermit(ctx context.Context, req *pb.CreatePermitRequest) (*pb.CreatePermitResponse, error) {
 	fileID := req.GetFileID()
+	fileName := req.GetFileName()
 	sharerID := req.GetSharerID()
 	users := req.GetUsers()
 	classification := req.GetClassification()
@@ -138,6 +140,7 @@ func (s Service) CreatePermit(ctx context.Context, req *pb.CreatePermitRequest) 
 		Approvers:      approvers,
 		To:             userIDs,
 		FileID:         fileID,
+		FileName:       fileName,
 		Info:           info,
 		Classification: classification,
 	}

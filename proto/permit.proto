@@ -11,11 +11,12 @@ service permit {
 
 message CreatePermitRequest {
     string fileID = 1;
-    string sharerID = 2;
-    repeated User users = 3;
-    string classification = 4;
-    string info = 5;
-    repeated string approvers = 6;
+    string fileName = 2;
+    string sharerID = 3;
+    repeated User users = 4;
+    string classification = 5;
+    string info = 6;
+    repeated string approvers = 7;
 }
 
 message User {
