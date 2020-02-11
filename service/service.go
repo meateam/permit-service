@@ -3,6 +3,7 @@ package service
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -153,7 +154,11 @@ func (s Service) CreatePermit(ctx context.Context, req *pb.CreatePermitRequest) 
 		return nil, fmt.Errorf("failed creating json object, %v", err)
 	}
 
-	client := &http.Client{}
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	client := &http.Client{Transport: tr}
 	httpReq, err := http.NewRequest("POST", s.approvalURL, bytes.NewBuffer(requestBody))
 	if err != nil {
 		return nil, fmt.Errorf("error while creating http request to approval, %v", err)
