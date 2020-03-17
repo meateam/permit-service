@@ -7,7 +7,7 @@ services:
     volumes:
       - ../data/db:/data/db
   permit-service:
-    image: permit-service:latest
+    image: permit-service:local
     # build:
     #   context: .
     #   dockerfile: Dockerfile
@@ -20,11 +20,11 @@ services:
       PMTS_APPROVAL_URL: http://23.102.32.203/api/v1/request
       PMTS_SPIKE_SERVICE: spike-service:8080
       PMTS_ELASTIC_APM_IGNORE_URLS: '/grpc.health.v1.Health/Check'
-      ELASTICSEARCH_URL: http://localhost:9200
+      ELASTICSEARCH_URL: http://13.69.137.179/:9200
       LOG_INDEX: kdrive
       LOG_LEVEL: debug
       HEALTH_CHECK_INTERVAL: 5
-      ELASTIC_APM_SERVER_URL: 'http://localhost:8200'
+      ELASTIC_APM_SERVER_URL: 'http://13.69.137.179:8200'
       ELASTIC_APM_SERVICE_NAME: 'permit-service'
       ELASTIC_APM_SERVICE_VERSION: '0.1'
       ELASTIC_APM_ENVIRONMENT: 'development'
@@ -37,7 +37,7 @@ services:
       - mongo
       - spike-service
   spike-service:
-    image: spike-service:latest
+    image: bluehub.azurecr.io/meateam/spike-service:develop
     environment:
       AUDIENCE: "AUDIENCE"
       SPIKE_CLIENT_ID: "EPBpjCiczupCXZgBEq3ARZCinUt4LSXtOsVrI1Ub"

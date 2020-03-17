@@ -85,20 +85,20 @@ func (s Service) CreatePermit(ctx context.Context, req *pb.CreatePermitRequest) 
 	usersNum := len(users)
 
 	if fileID == "" {
-		return nil, fmt.Errorf("fileID is required")
+		return nil, s.logError("fileID is required %v", req)
 	}
 
 	if sharerID == "" {
-		return nil, fmt.Errorf("sharerID is required")
+		return nil, s.logError("sharerID is required %v", req)
 	}
 
 	if usersNum == 0 {
-		return nil, fmt.Errorf("at least one user is required")
+		return nil, s.logError("at least one user is required %v", req)
 	}
 
 	reqID, err := ksuid.NewRandomWithTime(time.Now())
 	if err != nil {
-		return nil, fmt.Errorf("failed creating reqID")
+		return nil, s.logError("failed creating reqID %v", req)
 	}
 
 	// Add the permits to mongo
@@ -119,7 +119,7 @@ func (s Service) CreatePermit(ctx context.Context, req *pb.CreatePermitRequest) 
 			defer wg.Done()
 			_, err := s.controller.CreatePermit(ctx, reqID.String(), fileID, userIDs[i].ID, StatusPending)
 			if err != nil {
-				_ = fmt.Errorf("failed creating permit %s %s %v", fileID, users[i].GetId(), err)
+				_ = s.logError("failed creating permit %s %s %v", fileID, users[i].GetId(), err)
 			}
 		}(i)
 	}
@@ -132,7 +132,7 @@ func (s Service) CreatePermit(ctx context.Context, req *pb.CreatePermitRequest) 
 
 	tokenRes, err := s.spikeClient.GetSpikeToken(ctx, getSpikeTokenRequest)
 	if err != nil {
-		return nil, fmt.Errorf("failed getting spike token %v", err)
+		return nil, s.logError("failed getting spike token %v", err)
 	}
 
 	token := tokenRes.GetToken()
@@ -151,7 +151,7 @@ func (s Service) CreatePermit(ctx context.Context, req *pb.CreatePermitRequest) 
 	requestBody, err := json.Marshal(request)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed creating json object, %v", err)
+		return nil, s.logError("failed creating json object, %v", err)
 	}
 
 	tr := &http.Transport{
@@ -161,13 +161,13 @@ func (s Service) CreatePermit(ctx context.Context, req *pb.CreatePermitRequest) 
 	client := &http.Client{Transport: tr}
 	httpReq, err := http.NewRequest("POST", s.approvalURL, bytes.NewBuffer(requestBody))
 	if err != nil {
-		return nil, fmt.Errorf("error while creating http request to approval, %v", err)
+		return nil, s.logError("error while creating http request to approval, %v", err)
 	}
 	httpReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 	httpReq.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(httpReq)
 	if err != nil {
-		return nil, fmt.Errorf("error while requesting from approval service %v", err)
+		return nil, s.logError("error while requesting from approval service %v", err)
 	}
 
 	defer resp.Body.Close()
@@ -179,12 +179,12 @@ func (s Service) CreatePermit(ctx context.Context, req *pb.CreatePermitRequest) 
 func (s Service) GetPermitByFileID(ctx context.Context, req *pb.GetPermitByFileIDRequest) (*pb.GetPermitByFileIDResponse, error) {
 	fileID := req.GetFileID()
 	if fileID == "" {
-		return nil, fmt.Errorf("fileID is required")
+		return nil, s.logError("fileID is required")
 	}
 
 	userStatuses, err := s.controller.GetPermitsByFileID(ctx, fileID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve permit %v", err)
+		return nil, s.logError("failed to retrieve permit %v", err)
 	}
 
 	return &pb.GetPermitByFileIDResponse{UserStatus: userStatuses}, nil
@@ -195,12 +195,12 @@ func (s Service) HasPermit(ctx context.Context, req *pb.HasPermitRequest) (*pb.H
 	fileID := req.GetFileID()
 	userID := req.GetUserID()
 	if fileID == "" || userID == "" {
-		return nil, fmt.Errorf("fileID and userID are required")
+		return nil, s.logError("fileID and userID are required")
 	}
 
 	hasPermit, err := s.controller.HasPermit(ctx, fileID, userID)
 	if err != nil {
-		return nil, fmt.Errorf("failed in reqesting permit %v", err)
+		return nil, s.logError("failed in reqesting permit %v", err)
 	}
 
 	return &pb.HasPermitResponse{HasPermit: hasPermit}, nil
@@ -212,17 +212,24 @@ func (s Service) UpdatePermitStatus(ctx context.Context, req *pb.UpdatePermitSta
 	status := req.GetStatus()
 
 	if reqID == "" {
-		return nil, fmt.Errorf("reqID is required")
+		return nil, s.logError("reqID is required")
 	}
 
 	ok, err := s.controller.UpdatePermitStatus(ctx, reqID, status)
 	if err != nil {
-		return nil, fmt.Errorf("update permit status failed %v", err)
+		return nil, s.logError("update permit status failed %v", err)
 	}
 
 	if !ok {
-		_ = fmt.Errorf("error updating permit status")
+		_ = s.logError("error updating permit status")
 	}
 
 	return &pb.UpdatePermitStatusResponse{}, nil
+}
+
+// Logs an error and returns it
+func (s Service) logError(msg string, a ...interface{}) error {
+	err := fmt.Errorf(msg, a)
+	s.logger.Errorf(err.Error())
+	return err
 }

@@ -15,7 +15,9 @@ require (
 	go.elastic.co/apm/module/apmgrpc v1.6.0
 	go.elastic.co/apm/module/apmmongo v1.6.0
 	go.mongodb.org/mongo-driver v1.2.0
+	golang.org/x/tools v0.0.0-20190524140312-2c0ae7006135 // indirect
 	google.golang.org/grpc v1.25.1
+	honnef.co/go/tools v0.0.0-20190523083050-ea95bdfd59fc // indirect
 )
 
 replace github.com/meateam/permit-service/service => ./service
