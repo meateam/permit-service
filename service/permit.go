@@ -21,5 +21,8 @@ type Permit interface {
 	GetStatus() string
 	SetStatus(status string) error
 
+	GetStatusObject() *pb.StatusObject
+	SetStatusObject(statusObject *pb.StatusObject) error
+
 	MarshalProto(permit *pb.PermitObject) error
 }

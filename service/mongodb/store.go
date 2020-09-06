@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	pb "github.com/meateam/permit-service/proto"
 	"github.com/meateam/permit-service/service"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -27,8 +28,11 @@ const (
 	// PermitBSONReqIDField is the name of the reqID field in BSON.
 	PermitBSONReqIDField = "reqID"
 
-	// PermitBSONStatusField is the name of the reqID field in BSON.
+	// PermitBSONStatusField is the name of the status field in BSON.
 	PermitBSONStatusField = "status"
+
+	// PermitBSONStatusObjectField is the name of the statusObject field in BSON.
+	PermitBSONStatusObjectField = "statusObject"
 )
 
 // MongoStore holds the mongodb database and implements Store interface.
@@ -79,13 +83,13 @@ func (s MongoStore) HealthCheck(ctx context.Context) (bool, error) {
 func (s MongoStore) Get(ctx context.Context, filter interface{}) (service.Permit, error) {
 	collection := s.DB.Collection(PermitCollectionName)
 
-	permission := &BSON{}
-	err := collection.FindOne(ctx, filter).Decode(permission)
+	permit := &BSON{}
+	err := collection.FindOne(ctx, filter).Decode(permit)
 	if err != nil {
 		return nil, err
 	}
 
-	return permission, nil
+	return permit, nil
 }
 
 // GetAll finds all permits that matches filter,
@@ -140,6 +144,11 @@ func (s MongoStore) Create(ctx context.Context, permit service.Permit) (service.
 		return nil, fmt.Errorf("reqID is required")
 	}
 
+	statusObject := permit.GetStatusObject()
+	if statusObject == nil {
+		return nil, fmt.Errorf("statusObject is required")
+	}
+
 	status := permit.GetStatus()
 
 	filter := bson.D{
@@ -170,6 +179,10 @@ func (s MongoStore) Create(ctx context.Context, permit service.Permit) (service.
 			Key:   PermitBSONStatusField,
 			Value: status,
 		},
+		bson.E{
+			Key:   PermitBSONStatusObjectField,
+			Value: statusObject,
+		},
 	}
 
 	update := bson.D{
@@ -191,7 +204,7 @@ func (s MongoStore) Create(ctx context.Context, permit service.Permit) (service.
 }
 
 // UpdateStatus updates all permits with a given reqID to a given status
-func (s MongoStore) UpdateStatus(ctx context.Context, reqID string, status string) error {
+func (s MongoStore) UpdateStatus(ctx context.Context, reqID string, status string, statusObject *pb.StatusObject) error {
 	collection := s.DB.Collection(PermitCollectionName)
 	if reqID == "" {
 		return fmt.Errorf("reqID is required")
@@ -204,10 +217,19 @@ func (s MongoStore) UpdateStatus(ctx context.Context, reqID string, status strin
 		},
 	}
 
-	update := bson.M{
-		"$set": bson.M{
-			PermitBSONStatusField: status,
-		},
+	update := bson.M{}
+	if status == "" {
+		update = bson.M{
+			"$set": bson.M{
+				PermitBSONStatusField: status,
+			},
+		}
+	} else {
+		update = bson.M{
+			"$set": bson.M{
+				PermitBSONStatusObjectField: statusObject,
+			},
+		}
 	}
 
 	// Call the driver's UpdateMany() method and pass filter and update to it

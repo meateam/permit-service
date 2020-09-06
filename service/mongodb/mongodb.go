@@ -9,11 +9,12 @@ import (
 
 // BSON is the struct that represents a permit as it's stored.
 type BSON struct {
-	ID     primitive.ObjectID `bson:"_id,omitempty"`
-	FileID string             `bson:"fileID, omitempty"`
-	Status string             `bson:"status,omitempty"`
-	UserID string             `bson:"userID,omitempty"`
-	ReqID  string             `bson:"reqID,omitempty"`
+	ID           primitive.ObjectID `bson:"_id,omitempty"`
+	FileID       string             `bson:"fileID, omitempty"`
+	Status       string             `bson:"status,omitempty"`
+	UserID       string             `bson:"userID,omitempty"`
+	ReqID        string             `bson:"reqID,omitempty"`
+	StatusObject *pb.StatusObject   `bson:"ststusObject,omitempty"`
 }
 
 // GetID returns the string value of the b.ID.
@@ -74,6 +75,34 @@ func (b *BSON) SetStatus(status string) error {
 	return nil
 }
 
+// GetStatusObject returns b.Status.
+func (b BSON) GetStatusObject() *pb.StatusObject {
+	return b.StatusObject
+}
+
+// SetStatusObject returns b.Status.
+func (b *BSON) SetStatusObject(statusObject *pb.StatusObject) error {
+	if b == nil {
+		panic("b == nil")
+	}
+
+	b.MarshalStatusObject(statusObject)
+	return nil
+}
+
+func (b BSON) MarshalStatusObject(statusObject *pb.StatusObject) error {
+	newStatusObject := &pb.StatusObject{
+		Source:      statusObject.Source,
+		Type:        statusObject.Type,
+		Name:        statusObject.Name,
+		DisplayName: statusObject.DisplayName,
+		Description: statusObject.Description,
+	}
+
+	b.StatusObject = newStatusObject
+	return nil
+}
+
 // GetUserID returns b.UserID.
 func (b BSON) GetUserID() string {
 	return b.UserID
@@ -112,12 +141,13 @@ func (b *BSON) SetReqID(reqID string) error {
 	return nil
 }
 
-// MarshalProto marshals b into a permission.
+// MarshalProto marshals b into a permit.
 func (b BSON) MarshalProto(permit *pb.PermitObject) error {
 	permit.ReqID = b.GetReqID()
 	permit.FileID = b.GetFileID()
 	permit.UserID = b.GetUserID()
 	permit.Status = b.GetStatus()
+	permit.StatusObject = b.GetStatusObject()
 
 	return nil
 }

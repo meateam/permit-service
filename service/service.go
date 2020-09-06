@@ -22,6 +22,13 @@ const (
 	StatusPending = "pending"
 )
 
+// StatusObjectPnding is the statusObject of a pending request
+var StatusObjectPnding = &pb.StatusObject{Source: "drive",
+	Type:        "pending",
+	Name:        "OBJECT_CREATED_IN_DRIVE",
+	DisplayName: "אובייקט נוצר בדרייב",
+	Description: "Object was created in the drive"}
+
 // Service is the structure used for handling
 type Service struct {
 	spikeClient spb.SpikeClient
@@ -117,7 +124,7 @@ func (s Service) CreatePermit(ctx context.Context, req *pb.CreatePermitRequest) 
 	for i := 0; i < usersNum; i++ {
 		go func(i int) {
 			defer wg.Done()
-			_, err := s.controller.CreatePermit(ctx, reqID.String(), fileID, userIDs[i].ID, StatusPending)
+			_, err := s.controller.CreatePermit(ctx, reqID.String(), fileID, userIDs[i].ID, StatusPending, StatusObjectPnding)
 			if err != nil {
 				_ = fmt.Errorf("failed creating permit %s %s %v", fileID, users[i].GetId(), err)
 			}
@@ -210,12 +217,13 @@ func (s Service) HasPermit(ctx context.Context, req *pb.HasPermitRequest) (*pb.H
 func (s Service) UpdatePermitStatus(ctx context.Context, req *pb.UpdatePermitStatusRequest) (*pb.UpdatePermitStatusResponse, error) {
 	reqID := req.GetReqID()
 	status := req.GetStatus()
+	statusObject := req.GetStatusObject()
 
 	if reqID == "" {
 		return nil, fmt.Errorf("reqID is required")
 	}
 
-	ok, err := s.controller.UpdatePermitStatus(ctx, reqID, status)
+	ok, err := s.controller.UpdatePermitStatus(ctx, reqID, status, statusObject)
 	if err != nil {
 		return nil, fmt.Errorf("update permit status failed %v", err)
 	}

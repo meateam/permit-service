@@ -7,7 +7,7 @@ services:
     volumes:
       - ../data/db:/data/db
   permit-service:
-    image: permit-service:latest
+    image: permit-service:local
     # build:
     #   context: .
     #   dockerfile: Dockerfile
@@ -17,14 +17,14 @@ services:
       PMTS_MONGO_HOST: mongodb://mongo:27017/permit
       PMTS_GRANT_TYPE: client_credentials
       PMTS_AUDIENCE: "_LCF5avgIpoXSWhY5Jl8mMi0Q~4_~R"
-      PMTS_APPROVAL_URL: http://23.102.32.203/api/v1/request
+      PMTS_APPROVAL_URL: http://approval-system-server/api/v1/request
       PMTS_SPIKE_SERVICE: spike-service:8080
       PMTS_ELASTIC_APM_IGNORE_URLS: '/grpc.health.v1.Health/Check'
-      ELASTICSEARCH_URL: http://localhost:9200
+      ELASTICSEARCH_URL: http://52.169.253.183:9200
       LOG_INDEX: kdrive
       LOG_LEVEL: debug
       HEALTH_CHECK_INTERVAL: 5
-      ELASTIC_APM_SERVER_URL: 'http://localhost:8200'
+      ELASTIC_APM_SERVER_URL: 'http://52.169.253.183:8200'
       ELASTIC_APM_SERVICE_NAME: 'permit-service'
       ELASTIC_APM_SERVICE_VERSION: '0.1'
       ELASTIC_APM_ENVIRONMENT: 'development'
@@ -37,7 +37,7 @@ services:
       - mongo
       - spike-service
   spike-service:
-    image: spike-service:latest
+    image:  drivehub.azurecr.io/meateam/spike-service:appID
     environment:
       AUDIENCE: "AUDIENCE"
       SPIKE_CLIENT_ID: "EPBpjCiczupCXZgBEq3ARZCinUt4LSXtOsVrI1Ub"
@@ -54,3 +54,35 @@ services:
     image: 'redis:alpine'
     ports:
       - '6379:6379'
+  approval-system-server:
+    image: registry.gitlab.com/yesodot/rnd/terminal-rabaz/dropbox/microservices/approval-system-server
+    environment:
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+      NODE_ENV: production
+      AUTH_CALLBACK_URL: /auth/callback
+      PORT: 80
+      DB_SERVERS: mongo
+      DB_NAME: approvals
+      SHRAGA_URL: http://13.79.7.3
+      SPIKE_REDIS_HOST: redis://redis
+      SPIKE_URL: https://spike.westeurope.cloudapp.azure.com:1337/oauth2/token
+      CLIENT_URL: http://approval-system-client/myApprovals
+      DRIVE_URL: http://test-sh.northeurope.cloudapp.azure.com
+      STATUS_SERVICE_URL: http://status-api:80/api/status
+      PUSH_SERVICE_URL: http://push-service
+      SPIKE_PUSH_SERVICE_AUDIENCE: JOPQO6k7n~bOGrnbwJFikLOW9f2AEO
+      APM_ACTIVE: 0
+    ports:
+      - 80:80
+    depends_on:
+      - redis
+      - mongo
+  status-api:
+    image: registry.gitlab.com/yesodot/rnd/terminal-rabaz/dropbox/microservices/status-api
+    ports:
+      - 8006:80
+    environment: 
+      MONGO_URL: mongodb://mongo:27017/
+
+
+

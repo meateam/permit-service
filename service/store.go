@@ -4,7 +4,7 @@ import (
 	"context"
 )
 
-// Store is an interface for handling the storing of permissions.
+// Store is an interface for handling the storing of permits.
 type Store interface {
 	Create(ctx context.Context, permit Permit) (Permit, error)
 	Get(ctx context.Context, filter interface{}) (Permit, error)

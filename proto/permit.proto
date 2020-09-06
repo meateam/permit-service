@@ -32,6 +32,7 @@ message CreatePermitResponse {
 message UpdatePermitStatusRequest {
     string reqID = 1;
     string status = 2;
+    StatusObject statusObject = 3;
 }
 
 message UpdatePermitStatusResponse {
@@ -59,6 +60,7 @@ message HasPermitResponse {
 message UserStatus {
     string userId = 1;
     string status = 2;
+    StatusObject statusObject = 3;
 }
 
 message PermitObject {
@@ -66,4 +68,13 @@ message PermitObject {
     string fileID = 2;
     string userID = 3;
     string status = 4;
+    StatusObject statusObject = 5;
+}
+
+message StatusObject {
+    string source = 1;
+    string type = 2;
+    string name = 3;
+    string displayName = 4;
+    string description = 5;
 }
