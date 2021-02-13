@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v2.0.1] - 2021-02-13
+
 ### Refactor
 
 - REFACTOR([95](https://github.com/meateam/drive-project/issues/96)): upgrade docker compose to v3 and use env_file
@@ -20,3 +22,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [unreleased]: https://github.com/meateam/permit-service/compare/master...develop
 [v2.0.0]: https://github.com/meateam/permit-service/compare/v1.3...v2.0.0
+[v2.0.1]: https://github.com/meateam/permit-service/compare/v2.0.0...v2.0.1
+
