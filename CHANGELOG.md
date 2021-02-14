@@ -7,7 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [v2.0.1] - 2021-02-13
+## [v2.0.1] - 2021-02-14
+
+### Added
+- CI: Add CI process
 
 ### Refactor
 
@@ -19,8 +22,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - none
 
-
 [unreleased]: https://github.com/meateam/permit-service/compare/master...develop
 [v2.0.0]: https://github.com/meateam/permit-service/compare/v1.3...v2.0.0
 [v2.0.1]: https://github.com/meateam/permit-service/compare/v2.0.0...v2.0.1
-
