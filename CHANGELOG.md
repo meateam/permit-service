@@ -19,7 +19,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - none
 
-
 [unreleased]: https://github.com/meateam/permit-service/compare/master...develop
 [v2.0.0]: https://github.com/meateam/permit-service/compare/v1.3...v2.0.0
 [v2.0.1]: https://github.com/meateam/permit-service/compare/v2.0.0...v2.0.1
