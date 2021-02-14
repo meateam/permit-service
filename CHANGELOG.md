@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [v2.0.1] - 2021-02-14
 
+### Added
+- CI: Add CI process
+
 ### Refactor
 
 - REFACTOR([95](https://github.com/meateam/drive-project/issues/96)): upgrade docker compose to v3 and use env_file
